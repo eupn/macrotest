@@ -1,10 +1,24 @@
 #![crate_type = "lib"]
 
+use failure::Fail;
+use derive_more::From;
+
 use crate::common::Config;
 use std::path::PathBuf;
 
 pub mod common;
 mod expand;
+
+#[derive(Debug, Fail, From)]
+pub enum Error {
+    #[fail(display = "I/O error: {}", _0)]
+    IoError(#[cause] std::io::Error),
+
+    #[fail(display = "TOML serialization error: {}", _0)]
+    TomlSerError(#[cause] toml::ser::Error)
+}
+
+type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 enum ExpansionOutcome {
@@ -13,33 +27,35 @@ enum ExpansionOutcome {
     New,
 }
 
-fn expand_and_compare(config: &Config, src: &PathBuf, expanded: &PathBuf) -> ExpansionOutcome {
-    let tmp_crate = expand::make_tmp_cargo_crate_for_src(&config.dependencies, src);
-    let expansion = expand::expand_crate(&tmp_crate).expect("expand crate");
+fn expand_and_compare(config: &Config, src: &PathBuf, expanded: &PathBuf) -> Result<ExpansionOutcome> {
+    let tmp_crate = expand::make_tmp_cargo_crate_for_src(&config.dependencies, src)?;
+    let expansion = expand::expand_crate(&tmp_crate)?;
 
     if !expanded.exists() {
-        std::fs::write(expanded, &expansion).expect("create expansion file");
-        std::fs::remove_dir_all(&tmp_crate).expect("cleanup");
+        std::fs::write(expanded, &expansion)?;
+        std::fs::remove_dir_all(&tmp_crate)?;
 
-        return ExpansionOutcome::New;
+        return Ok(ExpansionOutcome::New);
     }
 
-    let expected_expansion = std::fs::read(expanded).expect("read .expanded.rs");
-    std::fs::remove_dir_all(&tmp_crate).expect("cleanup");
+    let expected_expansion = std::fs::read(expanded)?;
+    std::fs::remove_dir_all(&tmp_crate)?;
 
-    if expansion == expected_expansion {
+    Ok(if expansion == expected_expansion {
         ExpansionOutcome::Same
     } else {
         ExpansionOutcome::Different
-    }
+    })
 }
 
-pub fn run_tests(config: &Config) {
-    let dir = std::fs::read_dir(&config.src_base).expect("read dir");
+pub fn run_tests(config: &Config) -> Result<()> {
+    let dir = std::fs::read_dir(&config.src_base)?;
 
     let files = dir
         .into_iter()
-        .map(|e| e.unwrap())
+        .collect::<std::result::Result<Vec<_>, _>>()?;
+
+    let files = files.into_iter()
         .filter(|entry| entry.path().is_file())
         .filter(|entry| entry.path().to_string_lossy().ends_with(".rs"))
         .filter(|entry| !entry.path().to_string_lossy().ends_with(".expanded.rs"))
@@ -52,10 +68,12 @@ pub fn run_tests(config: &Config) {
         expanded.pop();
         let expanded = expanded.join(format!("{}.expanded.rs", file_stem));
 
-        match expand_and_compare(config, &file, &expanded) {
+        match expand_and_compare(config, &file, &expanded)? {
             ExpansionOutcome::Same => println!("{} - ok", file_stem),
             ExpansionOutcome::Different => println!("{} - different!", file_stem),
             ExpansionOutcome::New => println!("{} - refreshed", file_stem),
         }
     }
+
+    Ok(())
 }

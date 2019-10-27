@@ -15,5 +15,5 @@ pub fn run() {
         src_base: std::path::PathBuf::from("tests/expand"),
     };
 
-    run_tests(&config);
+    run_tests(&config).expect("expansion tests");
 }
