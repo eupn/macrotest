@@ -1,0 +1,12 @@
+[package]
+name = "macrotest"
+version = "0.1.0"
+authors = ["Evgenii P. <eupn@protonmail.com>"]
+edition = "2018"
+
+[dependencies]
+tempdir = "0.3.7"
+toml = "0.5.3"
+
+[dev-dependencies]
+tempfile = "3.1.0"
