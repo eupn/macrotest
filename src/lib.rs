@@ -21,7 +21,7 @@ fn expand_and_compare(config: &Config, src: &PathBuf, expanded: &PathBuf) -> Exp
         std::fs::write(expanded, &expansion).expect("create expansion file");
         std::fs::remove_dir_all(&tmp_crate).expect("cleanup");
 
-        return ExpansionOutcome::New
+        return ExpansionOutcome::New;
     }
 
     let expected_expansion = std::fs::read(expanded).expect("read .expanded.rs");
@@ -37,7 +37,8 @@ fn expand_and_compare(config: &Config, src: &PathBuf, expanded: &PathBuf) -> Exp
 pub fn run_tests(config: &Config) {
     let dir = std::fs::read_dir(&config.src_base).expect("read dir");
 
-    let files = dir.into_iter()
+    let files = dir
+        .into_iter()
         .map(|e| e.unwrap())
         .filter(|entry| entry.path().is_file())
         .filter(|entry| entry.path().to_string_lossy().ends_with(".rs"))
