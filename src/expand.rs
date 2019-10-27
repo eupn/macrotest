@@ -6,7 +6,9 @@ use toml::{map::Map, Value};
 
 use crate::common::{Dependency, DependencyKind};
 
-pub fn make_tmp_cargo_crate_for_src(dependencies: &[Dependency], src_path: &PathBuf) -> PathBuf {
+use crate::Result;
+
+pub fn make_tmp_cargo_crate_for_src(dependencies: &[Dependency], src_path: &PathBuf) -> Result<PathBuf> {
     // test_case.rs -> test_case-rs
     let file_name = src_path
         .file_name()
@@ -14,7 +16,7 @@ pub fn make_tmp_cargo_crate_for_src(dependencies: &[Dependency], src_path: &Path
         .to_string_lossy()
         .replace(".", "-");
 
-    let temp_dir = TempDir::new("macrotest").expect("temp dir");
+    let temp_dir = TempDir::new("macrotest")?;
     let dir_path = temp_dir.into_path();
 
     let mut cargo_toml = Map::new();
@@ -39,22 +41,21 @@ pub fn make_tmp_cargo_crate_for_src(dependencies: &[Dependency], src_path: &Path
 
     cargo_toml.insert("dependencies".into(), Value::Table(deps));
 
-    let cargo_toml = toml::to_string_pretty(&cargo_toml).expect("serialize cargo toml");
+    let cargo_toml = toml::to_string_pretty(&cargo_toml)?;
 
-    std::fs::write(dir_path.join("Cargo.toml"), cargo_toml).expect("Create Cargo.toml");
+    std::fs::write(dir_path.join("Cargo.toml"), cargo_toml)?;
 
-    std::fs::create_dir(dir_path.join("src")).expect("mkdir");
-    std::fs::copy(src_path, dir_path.join("src").join("main.rs")).expect("copy");
+    std::fs::create_dir(dir_path.join("src"))?;
+    std::fs::copy(src_path, dir_path.join("src").join("main.rs"))?;
 
-    dir_path
+    Ok(dir_path)
 }
 
-pub fn expand_crate(path: &PathBuf) -> Result<Vec<u8>, ()> {
+pub fn expand_crate(path: &PathBuf) -> Result<Vec<u8>> {
     let cargo_expand = Command::new("cargo")
         .arg("expand")
         .current_dir(path)
-        .output()
-        .expect("cargo expand");
+        .output()?;
 
     if !cargo_expand.status.success() {
         return Ok(cargo_expand.stderr);
