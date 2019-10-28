@@ -1,10 +1,11 @@
 #![crate_type = "lib"]
 
-use failure::Fail;
 use derive_more::From;
+use failure::Fail;
 
-use crate::common::Config;
-use std::path::PathBuf;
+use std::cell::RefCell;
+use std::path::{Path, PathBuf};
+use std::thread;
 
 pub mod common;
 mod expand;
@@ -15,7 +16,22 @@ pub enum Error {
     IoError(#[cause] std::io::Error),
 
     #[fail(display = "TOML serialization error: {}", _0)]
-    TomlSerError(#[cause] toml::ser::Error)
+    TomlSerError(#[cause] toml::ser::Error),
+
+    #[fail(display = "TOML deserialization error: {}", _0)]
+    TomlDeError(#[cause] toml::de::Error),
+
+    #[fail(display = "Glob error: {}", _0)]
+    GlobError(#[cause] glob::GlobError),
+
+    #[fail(display = "Glob pattern error: {}", _0)]
+    GlobPatternError(#[cause] glob::PatternError),
+
+    #[fail(display = "No CARGO_MANIFEST_DIR env var")]
+    ManifestDirError,
+
+    #[fail(display = "No CARGO_PKG_NAME env var")]
+    PkgName,
 }
 
 type Result<T> = std::result::Result<T, Error>;
@@ -27,53 +43,50 @@ enum ExpansionOutcome {
     New,
 }
 
-fn expand_and_compare(config: &Config, src: &PathBuf, expanded: &PathBuf) -> Result<ExpansionOutcome> {
-    let tmp_crate = expand::make_tmp_cargo_crate_for_src(&config.dependencies, src)?;
-    let expansion = expand::expand_crate(&tmp_crate)?;
-
-    if !expanded.exists() {
-        std::fs::write(expanded, &expansion)?;
-        std::fs::remove_dir_all(&tmp_crate)?;
-
-        return Ok(ExpansionOutcome::New);
-    }
-
-    let expected_expansion = std::fs::read(expanded)?;
-    std::fs::remove_dir_all(&tmp_crate)?;
-
-    Ok(if expansion == expected_expansion {
-        ExpansionOutcome::Same
-    } else {
-        ExpansionOutcome::Different
-    })
+#[derive(Debug)]
+pub struct TestCases {
+    inner: RefCell<Expander>,
 }
 
-pub fn run_tests(config: &Config) -> Result<()> {
-    let dir = std::fs::read_dir(&config.src_base)?;
+#[derive(Debug)]
+struct Expander {
+    tests: Vec<Test>,
+}
 
-    let files = dir
-        .into_iter()
-        .collect::<std::result::Result<Vec<_>, _>>()?;
+#[derive(Debug, Copy, Clone)]
+enum Expected {
+    Pass,
 
-    let files = files.into_iter()
-        .filter(|entry| entry.path().is_file())
-        .filter(|entry| entry.path().to_string_lossy().ends_with(".rs"))
-        .filter(|entry| !entry.path().to_string_lossy().ends_with(".expanded.rs"))
-        .map(|entry| entry.path())
-        .collect::<Vec<_>>();
+    #[allow(dead_code)]
+    CompileFail,
+}
 
-    for file in files {
-        let file_stem = file.file_stem().expect("no file stem").to_string_lossy();
-        let mut expanded = file.clone();
-        expanded.pop();
-        let expanded = expanded.join(format!("{}.expanded.rs", file_stem));
+#[derive(Clone, Debug)]
+struct Test {
+    path: PathBuf,
+    expected: Expected,
+}
 
-        match expand_and_compare(config, &file, &expanded)? {
-            ExpansionOutcome::Same => println!("{} - ok", file_stem),
-            ExpansionOutcome::Different => println!("{} - different!", file_stem),
-            ExpansionOutcome::New => println!("{} - refreshed", file_stem),
+impl TestCases {
+    pub fn new() -> Self {
+        TestCases {
+            inner: RefCell::new(Expander { tests: Vec::new() }),
         }
     }
 
-    Ok(())
+    pub fn pass<P: AsRef<Path>>(&self, path: P) {
+        self.inner.borrow_mut().tests.push(Test {
+            path: path.as_ref().to_owned(),
+            expected: Expected::Pass,
+        });
+    }
+}
+
+#[doc(hidden)]
+impl Drop for TestCases {
+    fn drop(&mut self) {
+        if !thread::panicking() {
+            self.inner.borrow_mut().expand();
+        }
+    }
 }

@@ -9,6 +9,7 @@ tempdir = "0.3.7"
 toml = "0.5.3"
 failure = "0.1.6"
 derive_more = "0.15.0"
+glob = "0.3"
 
 [dev-dependencies]
 tempfile = "3.1.0"
