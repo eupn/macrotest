@@ -20,8 +20,8 @@
 //! the source files matches the glob pattern as `main.rs` in a separate `cargo` crate in
 //! temporary folder and will invoke `cargo expand` to expand macro invocations.
 //!
-//! Project's crate is listed under `[dependencies]` section of temporary crates and available
-//! from the test cases.
+//! Project's crate will listed under `[dependencies]` section of temporary crates and will be
+//! available from the test cases.
 //!
 //! Expansion result is compared with the corresponding `.expanded.rs` file (same file name as
 //! the test except with a different extension). If file doesn't exists, it will create a new one

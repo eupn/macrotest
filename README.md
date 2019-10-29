@@ -8,6 +8,15 @@ Similar to [trybuild], but allows you to write tests on how macros are expanded.
 
 A minimal `macrotest` setup looks like this:
 
+In project's Cargo.toml:
+
+```toml
+[dev-dependencies]
+macrotest = "0.1"
+```
+
+Under project's `tests/` directory create `tests.rs`:
+
 ```rust
 #[test]
 pub fn pass() {
@@ -20,7 +29,7 @@ The test can be run with `cargo test`. It will individually extract each of
 the source files matches the glob pattern as `main.rs` in a separate `cargo` crate in
 temporary folder and will invoke `cargo expand` to expand macro invocations.
 
-Project's crate is listed under `[dependencies]` section of temporary crates and available
+Project's crate will be listed under `[dependencies]` section of temporary crates and will be available
 from the test cases.
 
 Expansion result is compared with the corresponding `.expanded.rs` file (same file name as
