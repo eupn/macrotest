@@ -1,6 +1,5 @@
-use macrotest::TestCases;
-
 #[test]
-pub fn run() {
-    TestCases::new().pass("tests/expand/*.rs");
+pub fn pass() {
+    let t = macrotest::TestCases::new();
+    t.pass("tests/expand/*.rs");
 }

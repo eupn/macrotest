@@ -3,6 +3,9 @@ name = "macrotest"
 version = "0.1.0"
 authors = ["Evgenii P. <eupn@protonmail.com>"]
 edition = "2018"
+license = "MIT or Apache-2.0"
+readme = "README"
+repository = "https://github.com/eupn/macrotest"
 
 [dependencies]
 tempdir = "0.3.7"
