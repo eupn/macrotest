@@ -5,6 +5,8 @@ use tempdir::TempDir;
 use toml::{map::Map, Value};
 
 use crate::{Error, Expander, ExpansionOutcome, Result, Test};
+use crate::message::{message_different, message_expansion_error};
+
 use std::env;
 
 impl Expander {
@@ -29,11 +31,18 @@ impl Expander {
             match test.run() {
                 Ok(outcome) => match outcome {
                     ExpansionOutcome::Same => println!("{} - ok", file_stem),
-                    ExpansionOutcome::Different => {
-                        println!("{} - different!", file_stem);
+
+                    ExpansionOutcome::Different(a, b) => {
+                        message_different(&file_stem, &a, &b);
                         failures += 1;
                     }
-                    ExpansionOutcome::New => println!("{} - refreshed", file_stem),
+
+                    ExpansionOutcome::New(_) => println!("{} - refreshed", file_stem),
+
+                    ExpansionOutcome::ExpandError(msg) => {
+                        message_expansion_error(msg);
+                        failures += 1;
+                    }
                 },
 
                 Err(e) => {
@@ -59,7 +68,11 @@ struct ExpandedTest {
 impl ExpandedTest {
     pub fn run(&self) -> Result<ExpansionOutcome> {
         let temp_crate = make_tmp_cargo_crate_for_src(&self.test.path)?;
-        let expansion = expand_crate(&temp_crate)?;
+        let (success, output) = expand_crate(&temp_crate)?;
+
+        if !success {
+            return Ok(ExpansionOutcome::ExpandError(output))
+        }
 
         let file_stem = self
             .test
@@ -72,19 +85,19 @@ impl ExpandedTest {
         let expanded = expanded.join(format!("{}.expanded.rs", file_stem));
 
         if !expanded.exists() {
-            std::fs::write(expanded, &expansion)?;
+            std::fs::write(expanded, &output)?;
             std::fs::remove_dir_all(&temp_crate)?;
 
-            return Ok(ExpansionOutcome::New);
+            return Ok(ExpansionOutcome::New(output));
         }
 
         let expected_expansion = std::fs::read(expanded)?;
         std::fs::remove_dir_all(&temp_crate)?;
 
-        Ok(if expansion == expected_expansion {
+        Ok(if output == expected_expansion {
             ExpansionOutcome::Same
         } else {
-            ExpansionOutcome::Different
+            ExpansionOutcome::Different(expected_expansion, output)
         })
     }
 }
@@ -212,15 +225,16 @@ pub fn make_tmp_cargo_crate_for_src(src_path: &PathBuf) -> Result<PathBuf> {
     Ok(dir_path)
 }
 
-pub fn expand_crate(path: &PathBuf) -> Result<Vec<u8>> {
+pub fn expand_crate(path: &PathBuf) -> Result<(bool, Vec<u8>)> {
     let cargo_expand = Command::new("cargo")
         .arg("expand")
         .current_dir(path)
-        .output()?;
+        .output()
+        .map_err(|e| Error::CargoExpandExecutionError(e.to_string()))?;
 
     if !cargo_expand.status.success() {
-        return Ok(cargo_expand.stderr);
+        return Ok((false, cargo_expand.stderr));
     }
 
-    Ok(cargo_expand.stdout)
+    Ok((true, cargo_expand.stdout))
 }
