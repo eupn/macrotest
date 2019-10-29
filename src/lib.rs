@@ -9,9 +9,13 @@ use std::thread;
 
 pub mod common;
 mod expand;
+mod message;
 
 #[derive(Debug, Fail, From)]
 pub enum Error {
+    #[fail(display = "Failed to execute `cargo expand`: {}", _0)]
+    CargoExpandExecutionError(String),
+
     #[fail(display = "I/O error: {}", _0)]
     IoError(#[cause] std::io::Error),
 
@@ -39,8 +43,9 @@ type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug)]
 enum ExpansionOutcome {
     Same,
-    Different,
-    New,
+    Different(Vec<u8>, Vec<u8>),
+    New(Vec<u8>),
+    ExpandError(Vec<u8>),
 }
 
 #[derive(Debug)]
