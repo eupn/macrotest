@@ -8,6 +8,9 @@ jobs:
     - rust: nightly
   fast_finish: true
 
+before_script:
+  - cargo install cargo-expand
+
 script:
   - cargo build --verbose --all
   - cd test-project
