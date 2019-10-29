@@ -1,5 +1,10 @@
 # `macrotest`
 
+[![Crates.io](https://img.shields.io/crates/v/macrotest)](https://crates.io/crates/macrotest)
+[![Crates.io](https://img.shields.io/crates/d/macrotest)](https://crates.io/crates/macrotest)
+[![Crates.io](https://img.shields.io/crates/l/macrotest)](https://crates.io/crates/macrotest)
+[![docs.rs](https://docs.rs/macrotest/badge.svg)](https://docs.rs/macrotest/)
+
 Similar to [trybuild], but allows you to write tests on how macros are expanded.
 
 ----
