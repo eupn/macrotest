@@ -98,7 +98,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "macrotest"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "derive_more 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "difference 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -277,7 +277,7 @@ dependencies = [
 name = "test-project"
 version = "0.1.0"
 dependencies = [
- "macrotest 0.1.0",
+ "macrotest 0.1.1",
 ]
 
 [[package]]
