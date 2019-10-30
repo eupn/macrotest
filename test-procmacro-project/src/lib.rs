@@ -1,6 +1,3 @@
-// You might need to use this in future since quote! macro can be highly-recursive
-//#![recursion_limit="1024"]
-
 extern crate proc_macro;
 use proc_macro::TokenStream;
 
