@@ -5,6 +5,7 @@ rust:
 
 before_script:
   - rustup toolchain install nightly
+  - rustup component add rustfmt
   - cargo install cargo-expand
 
 script:
