@@ -4,7 +4,7 @@ use std::process::Command;
 use tempdir::TempDir;
 use toml::{map::Map, Value};
 
-use crate::{Error, Expander, ExpansionOutcome, Result, Test};
+use crate::{error::Error, Expander, ExpansionOutcome, error::Result, Test};
 use crate::message::{message_different, message_expansion_error};
 
 use std::env;
@@ -171,7 +171,7 @@ fn fix_relative_paths_in_deps(
     }
 }
 
-pub fn make_tmp_cargo_crate_for_src(src_path: &PathBuf) -> Result<PathBuf> {
+pub(crate) fn make_tmp_cargo_crate_for_src(src_path: &PathBuf) -> Result<PathBuf> {
     let crate_name = env::var("CARGO_PKG_NAME").map_err(|_| Error::PkgName)?;
     let source_dir = env::var_os("CARGO_MANIFEST_DIR")
         .ok_or(Error::ManifestDirError)
@@ -225,7 +225,7 @@ pub fn make_tmp_cargo_crate_for_src(src_path: &PathBuf) -> Result<PathBuf> {
     Ok(dir_path)
 }
 
-pub fn expand_crate(path: &PathBuf) -> Result<(bool, Vec<u8>)> {
+pub(crate) fn expand_crate(path: &PathBuf) -> Result<(bool, Vec<u8>)> {
     let cargo_expand = Command::new("cargo")
         .arg("expand")
         .current_dir(path)

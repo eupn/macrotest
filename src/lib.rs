@@ -78,45 +78,13 @@
 
 #![crate_type = "lib"]
 
-use derive_more::From;
-use failure::Fail;
-
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::thread;
 
-pub mod common;
 mod expand;
 mod message;
-
-#[derive(Debug, Fail, From)]
-pub enum Error {
-    #[fail(display = "Failed to execute `cargo expand`: {}", _0)]
-    CargoExpandExecutionError(String),
-
-    #[fail(display = "I/O error: {}", _0)]
-    IoError(#[cause] std::io::Error),
-
-    #[fail(display = "TOML serialization error: {}", _0)]
-    TomlSerError(#[cause] toml::ser::Error),
-
-    #[fail(display = "TOML deserialization error: {}", _0)]
-    TomlDeError(#[cause] toml::de::Error),
-
-    #[fail(display = "Glob error: {}", _0)]
-    GlobError(#[cause] glob::GlobError),
-
-    #[fail(display = "Glob pattern error: {}", _0)]
-    GlobPatternError(#[cause] glob::PatternError),
-
-    #[fail(display = "No CARGO_MANIFEST_DIR env var")]
-    ManifestDirError,
-
-    #[fail(display = "No CARGO_PKG_NAME env var")]
-    PkgName,
-}
-
-type Result<T> = std::result::Result<T, Error>;
+mod error;
 
 #[derive(Debug)]
 enum ExpansionOutcome {
