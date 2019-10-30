@@ -4,8 +4,8 @@ use std::process::Command;
 use tempdir::TempDir;
 use toml::{map::Map, Value};
 
-use crate::{error::Error, Expander, ExpansionOutcome, error::Result, Test};
 use crate::message::{message_different, message_expansion_error};
+use crate::{error::Error, error::Result, Expander, ExpansionOutcome, Test};
 
 use std::env;
 
@@ -55,7 +55,7 @@ impl Expander {
         println!("\n\n");
 
         if failures > 0 {
-            panic!("{} or {} tests failed", failures, len);
+            panic!("{} of {} tests failed", failures, len);
         }
     }
 }
@@ -71,8 +71,10 @@ impl ExpandedTest {
         let (success, output) = expand_crate(&temp_crate)?;
 
         if !success {
-            return Ok(ExpansionOutcome::ExpandError(output))
+            return Ok(ExpansionOutcome::ExpandError(output));
         }
+
+        let output = normalize_expansion(&output);
 
         let file_stem = self
             .test
@@ -102,6 +104,21 @@ impl ExpandedTest {
     }
 }
 
+// `cargo expand` does always produce some fixed amount of lines that should be ignored
+const CARGO_EXPAND_SKIP_LINES_COUNT: usize = 6;
+
+fn normalize_expansion(input: &[u8]) -> Vec<u8> {
+    let code = String::from_utf8_lossy(input);
+    let lines = code
+        .lines()
+        .skip(CARGO_EXPAND_SKIP_LINES_COUNT)
+        .map(std::borrow::ToOwned::to_owned)
+        .collect::<Vec<_>>();
+    let lines = lines.join("\n");
+
+    lines.as_bytes().to_vec()
+}
+
 fn expand_globs(tests: &[Test]) -> Vec<ExpandedTest> {
     fn glob(pattern: &str) -> Result<Vec<PathBuf>> {
         let mut paths = glob::glob(pattern)?
@@ -126,7 +143,6 @@ fn expand_globs(tests: &[Test]) -> Vec<ExpandedTest> {
                             vec.push(ExpandedTest {
                                 test: Test {
                                     path,
-                                    expected: expanded.test.expected,
                                 },
                                 error: None,
                             });

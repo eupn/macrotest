@@ -3,7 +3,9 @@ use std::convert::From;
 #[derive(Debug)]
 pub(crate) enum Error {
     CargoExpandExecutionError(String),
+    #[allow(dead_code)]
     CargoFail,
+    #[allow(dead_code)]
     CargoMetadata,
     IoError(std::io::Error),
     TomlSerError(toml::ser::Error),

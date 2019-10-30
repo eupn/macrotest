@@ -82,9 +82,9 @@ use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::thread;
 
+mod error;
 mod expand;
 mod message;
-mod error;
 
 #[derive(Debug)]
 enum ExpansionOutcome {
@@ -104,18 +104,9 @@ struct Expander {
     tests: Vec<Test>,
 }
 
-#[derive(Debug, Copy, Clone)]
-enum Expected {
-    Pass,
-
-    #[allow(dead_code)]
-    CompileFail,
-}
-
 #[derive(Clone, Debug)]
 struct Test {
     path: PathBuf,
-    expected: Expected,
 }
 
 impl TestCases {
@@ -128,7 +119,6 @@ impl TestCases {
     pub fn pass<P: AsRef<Path>>(&self, path: P) {
         self.inner.borrow_mut().tests.push(Test {
             path: path.as_ref().to_owned(),
-            expected: Expected::Pass,
         });
     }
 }
