@@ -1,24 +1,43 @@
-use difference::Changeset;
+use difference::{Changeset, Difference};
 
 /// Prints the difference of the two snippets of expanded code.
-pub fn message_different(name: &str, a: &[u8], b: &[u8]) {
+pub(crate) fn message_different(name: &str, a: &[u8], b: &[u8]) {
     let a = String::from_utf8_lossy(&a);
     let b = String::from_utf8_lossy(&b);
 
-    let changes = Changeset::new(&a, &b, "\n");
+    let Changeset { diffs, .. } = Changeset::new(&a, &b, "\n");
 
     eprintln!("{} - different!", name);
 
-    eprintln!();
-    eprintln!("--------------------------");
-    eprintln!("{}", changes.to_string());
+    eprintln!("Diff:");
     eprintln!("--------------------------");
 
+    for i in 0..diffs.len() {
+        match diffs[i] {
+            Difference::Same(ref x) => {
+                for line in x.lines() {
+                    eprintln!(" {}", line);
+                }
+            }
+            Difference::Add(ref x) => {
+                for line in x.lines() {
+                    eprintln!("+{}", line);
+                }
+            }
+            Difference::Rem(ref x) => {
+                for line in x.lines() {
+                    eprintln!("-{}", line);
+                }
+            }
+        }
+    }
+
+    eprintln!("--------------------------");
 }
 
 /// Prints an error from `cargo expand` invocation.
 /// Makes some suggestions when possible.
-pub fn message_expansion_error(msg: Vec<u8>) {
+pub(crate) fn message_expansion_error(msg: Vec<u8>) {
     let msg = String::from_utf8(msg);
 
     eprintln!("Expansion error:");

@@ -4,8 +4,8 @@ use std::process::Command;
 use tempdir::TempDir;
 use toml::{map::Map, Value};
 
-use crate::{error::Error, Expander, ExpansionOutcome, error::Result, Test};
 use crate::message::{message_different, message_expansion_error};
+use crate::{error::Error, error::Result, Expander, ExpansionOutcome, Test};
 
 use std::env;
 
@@ -55,7 +55,7 @@ impl Expander {
         println!("\n\n");
 
         if failures > 0 {
-            panic!("{} or {} tests failed", failures, len);
+            panic!("{} of {} tests failed", failures, len);
         }
     }
 }
@@ -71,7 +71,7 @@ impl ExpandedTest {
         let (success, output) = expand_crate(&temp_crate)?;
 
         if !success {
-            return Ok(ExpansionOutcome::ExpandError(output))
+            return Ok(ExpansionOutcome::ExpandError(output));
         }
 
         let file_stem = self
@@ -126,7 +126,6 @@ fn expand_globs(tests: &[Test]) -> Vec<ExpandedTest> {
                             vec.push(ExpandedTest {
                                 test: Test {
                                     path,
-                                    expected: expanded.test.expected,
                                 },
                                 error: None,
                             });
