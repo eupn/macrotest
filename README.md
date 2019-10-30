@@ -47,6 +47,20 @@ Possible test outcomes are:
 - **Refresh**: `.expanded.rs` didn't exist and has been created
 
 *NB*: after execution of each test, a temporary folder with the crate is removed automatically.
+*NB*: following code is removed from the expansion result:
+
+<details>
+
+```rust
+#![feature(prelude_import)] 
+#![no_std] 
+#[prelude_import] 
+use ::std::prelude::v1::*; 
+#[macro_use] 
+extern crate std;
+```
+
+</details>
 
 ## Workflow
 
@@ -58,6 +72,10 @@ cargo install cargo-expand
 ```
 
 A **nightly** compiler is required for this tool to operate, so it must be installed as well.
+
+`cargo-expand` uses [`rustfmt`](https://github.com/rust-lang/rustfmt) to format expanded code. 
+It's advised to install it, since examples in [test-project](test-project) and
+[test-procmacro-project](test-procmacro-project) are using formatted version of expanded code to compare with.
 
 ### Setting up a test project
 
