@@ -1,12 +1,24 @@
-use std::path::PathBuf;
-use std::process::Command;
 use std::env;
+use std::fs;
+use std::path::{Path, PathBuf};
 
-use tempdir::TempDir;
-use toml::{map::Map, Value};
-
+use crate::cargo;
+use crate::dependencies::{self, Dependency};
+use crate::features;
+use crate::manifest::{Bin, Build, Config, Manifest, Name, Package, Workspace};
 use crate::message::{message_different, message_expansion_error};
+use crate::rustflags;
 use crate::{error::Error, error::Result, Expander, ExpansionOutcome, Test};
+
+#[derive(Debug)]
+pub(crate) struct Project {
+    pub dir: PathBuf,
+    source_dir: PathBuf,
+    pub target_dir: PathBuf,
+    pub name: String,
+    pub features: Option<Vec<String>>,
+    workspace: PathBuf,
+}
 
 impl Expander {
     pub fn expand(&mut self) {
@@ -18,6 +30,10 @@ impl Expander {
         let len = tests.len();
         println!("Running {} macro expansion tests", len);
 
+        let project = self.prepare(&tests).unwrap_or_else(|err| {
+            panic!("prepare failed: {:#?}", err);
+        });
+
         let mut failures = 0;
         for test in tests {
             let file_stem = test
@@ -27,7 +43,7 @@ impl Expander {
                 .expect("no file stem")
                 .to_string_lossy();
 
-            match test.run() {
+            match test.run(&project) {
                 Ok(outcome) => match outcome {
                     ExpansionOutcome::Same => println!("{} - ok", file_stem),
 
@@ -56,17 +72,134 @@ impl Expander {
             panic!("{} of {} tests failed", failures, len);
         }
     }
+
+    fn prepare(&self, tests: &[ExpandedTest]) -> Result<Project> {
+        let metadata = cargo::metadata()?;
+        let target_dir = metadata.target_directory;
+        let workspace = metadata.workspace_root;
+
+        let crate_name = env::var("CARGO_PKG_NAME").map_err(|_| Error::PkgName)?;
+
+        let source_dir = env::var_os("CARGO_MANIFEST_DIR")
+            .map(PathBuf::from)
+            .ok_or(Error::ManifestDirError)?;
+
+        let features = features::find();
+
+        let mut project = Project {
+            dir: path!(target_dir / "tests" / crate_name),
+            source_dir,
+            target_dir,
+            name: format!("{}-tests", crate_name),
+            features,
+            workspace,
+        };
+
+        let manifest = self.make_manifest(crate_name, &project, tests)?;
+        let manifest_toml = toml::to_string(&manifest)?;
+
+        let config = self.make_config();
+        let config_toml = toml::to_string(&config)?;
+
+        if let Some(enabled_features) = &mut project.features {
+            enabled_features.retain(|feature| manifest.features.contains_key(feature));
+        }
+
+        fs::create_dir_all(path!(project.dir / ".cargo"))?;
+        fs::write(path!(project.dir / ".cargo" / "config"), config_toml)?;
+        fs::write(path!(project.dir / "Cargo.toml"), manifest_toml)?;
+        fs::write(path!(project.dir / "main.rs"), b"fn main() {}\n")?;
+
+        cargo::build_dependencies(&project)?;
+
+        Ok(project)
+    }
+
+    fn make_manifest(
+        &self,
+        crate_name: String,
+        project: &Project,
+        tests: &[ExpandedTest],
+    ) -> Result<Manifest> {
+        let source_manifest = dependencies::get_manifest(&project.source_dir);
+        let workspace_manifest = dependencies::get_workspace_manifest(&project.workspace);
+
+        let features = source_manifest
+            .features
+            .keys()
+            .map(|feature| {
+                let enable = format!("{}/{}", crate_name, feature);
+                (feature.clone(), vec![enable])
+            })
+            .collect();
+
+        let mut manifest = Manifest {
+            package: Package {
+                name: project.name.clone(),
+                version: "0.0.0".to_owned(),
+                edition: source_manifest.package.edition,
+                publish: false,
+            },
+            features,
+            dependencies: std::collections::BTreeMap::new(),
+            bins: Vec::new(),
+            workspace: Some(Workspace {}),
+            // Within a workspace, only the [patch] and [replace] sections in
+            // the workspace root's Cargo.toml are applied by Cargo.
+            patch: workspace_manifest.patch,
+            replace: workspace_manifest.replace,
+        };
+
+        manifest.dependencies.extend(source_manifest.dependencies);
+        manifest
+            .dependencies
+            .extend(source_manifest.dev_dependencies);
+        manifest.dependencies.insert(
+            crate_name,
+            Dependency {
+                version: None,
+                path: Some(project.source_dir.clone()),
+                default_features: false,
+                features: Vec::new(),
+                rest: std::collections::BTreeMap::new(),
+            },
+        );
+
+        manifest.bins.push(Bin {
+            name: Name(project.name.to_owned()),
+            path: Path::new("main.rs").to_owned(),
+        });
+
+        for expanded in tests {
+            if expanded.error.is_none() {
+                manifest.bins.push(Bin {
+                    name: expanded.name.clone(),
+                    path: project.source_dir.join(&expanded.test.path),
+                });
+            }
+        }
+
+        Ok(manifest)
+    }
+
+    fn make_config(&self) -> Config {
+        Config {
+            build: Build {
+                rustflags: rustflags::make_vec(),
+            },
+        }
+    }
 }
 
 struct ExpandedTest {
+    name: Name,
     test: Test,
     error: Option<Error>,
 }
 
 impl ExpandedTest {
-    pub fn run(&self) -> Result<ExpansionOutcome> {
-        let temp_crate = make_tmp_cargo_crate_for_src(&self.test.path)?;
-        let (success, output_bytes) = expand_crate(&temp_crate)?;
+    pub fn run(&self, project: &Project) -> Result<ExpansionOutcome> {
+        let (success, output_bytes) = cargo::expand(project, &self.name)?;
 
         if !success {
             return Ok(ExpansionOutcome::ExpandError(output_bytes));
@@ -86,15 +219,12 @@ impl ExpandedTest {
 
         if !expanded.exists() {
             std::fs::write(expanded, &output)?;
-            std::fs::remove_dir_all(&temp_crate)?;
 
             return Ok(ExpansionOutcome::New(output_bytes));
         }
 
         let expected_expansion_bytes = std::fs::read(expanded)?;
         let expected_expansion = String::from_utf8_lossy(&expected_expansion_bytes);
-
-        std::fs::remove_dir_all(&temp_crate)?;
 
         let same = output.lines().eq(expected_expansion.lines());
 
@@ -107,12 +237,11 @@ impl ExpandedTest {
 }
 
 // `cargo expand` does always produce some fixed amount of lines that should be ignored
-const CARGO_EXPAND_SKIP_LINES_COUNT: usize = 6;
+const CARGO_EXPAND_SKIP_LINES_COUNT: usize = 5;
 
 fn normalize_expansion(input: &[u8]) -> String {
     let code = String::from_utf8_lossy(input);
-    code
-        .lines()
+    code.lines()
         .skip(CARGO_EXPAND_SKIP_LINES_COUNT)
         .collect::<Vec<_>>()
         .join("\n")
@@ -130,7 +259,14 @@ fn expand_globs(tests: &[Test]) -> Vec<ExpandedTest> {
     let mut vec = Vec::new();
 
     for test in tests {
+        let name = test
+            .path
+            .file_stem()
+            .expect("no file stem")
+            .to_string_lossy()
+            .to_string();
         let mut expanded = ExpandedTest {
+            name: Name(name),
             test: test.clone(),
             error: None,
         };
@@ -139,10 +275,14 @@ fn expand_globs(tests: &[Test]) -> Vec<ExpandedTest> {
                 match glob(utf8) {
                     Ok(paths) => {
                         for path in paths {
+                            let name = path
+                                .file_stem()
+                                .expect("no file stem")
+                                .to_string_lossy()
+                                .to_string();
                             vec.push(ExpandedTest {
-                                test: Test {
-                                    path,
-                                },
+                                name: Name(name),
+                                test: Test { path },
                                 error: None,
                             });
                         }
@@ -156,100 +296,4 @@ fn expand_globs(tests: &[Test]) -> Vec<ExpandedTest> {
     }
 
     vec
-}
-
-#[allow(dead_code)]
-fn fix_relative_paths_in_deps(
-    root_path: &PathBuf,
-    dd: &toml::value::Table,
-    deps: &mut toml::map::Map<String, toml::value::Value>,
-) {
-    for (k, v) in dd {
-        let v = match v {
-            toml::value::Value::Table(map) => {
-                let mut new_map = map.clone();
-                if let Some(p) = new_map.get_mut("path") {
-                    let path = PathBuf::from(p.as_str().expect("path as string"));
-                    if path.is_relative() {
-                        let new_path =
-                            std::fs::canonicalize(root_path.join(path)).expect("canonicalize path");
-                        *p = toml::value::Value::String(new_path.to_string_lossy().to_string());
-                    }
-                };
-
-                toml::value::Value::Table(new_map)
-            }
-            _ => v.clone(),
-        };
-
-        deps.insert(k.clone(), v);
-    }
-}
-
-pub(crate) fn make_tmp_cargo_crate_for_src(src_path: &PathBuf) -> Result<PathBuf> {
-    let crate_name = env::var("CARGO_PKG_NAME").map_err(|_| Error::PkgName)?;
-    let source_dir = env::var_os("CARGO_MANIFEST_DIR")
-        .ok_or(Error::ManifestDirError)
-        .map(PathBuf::from)?;
-
-    /*
-    // Copy dev-dependencies as dependencies for the test crate
-    let manifest_file = source_dir.join("Cargo.toml");
-    let manifest = std::fs::read_to_string(manifest_file)?;
-    let manifest: toml::Value = toml::from_str(&manifest)?;
-
-    let dev_dependencies = manifest.get("dev-dependencies").and_then(|dd| dd.as_table());
-    if let Some(dd) = dev_dependencies {
-        fix_relative_paths_in_deps(&source_dir, dd, &mut deps);
-    };
-    */
-
-    let mut deps = toml::map::Map::new();
-    let mut map = toml::map::Map::new();
-    map.insert(
-        "path".to_string(),
-        toml::Value::String(source_dir.to_string_lossy().to_string()),
-    );
-    deps.insert(crate_name, toml::Value::Table(map));
-
-    // test_case.rs -> test_case-rs
-    let file_name = src_path
-        .file_name()
-        .expect("File name")
-        .to_string_lossy()
-        .replace(".", "-");
-
-    let temp_dir = TempDir::new("macrotest")?;
-    let dir_path = temp_dir.into_path();
-
-    let mut cargo_toml = Map::new();
-    let mut package = Map::new();
-    package.insert("name".into(), Value::String(file_name));
-    package.insert("version".into(), Value::String("0.1.0".into()));
-
-    cargo_toml.insert("package".into(), Value::Table(package));
-    cargo_toml.insert("dependencies".into(), Value::Table(deps.clone()));
-
-    let cargo_toml = toml::to_string_pretty(&cargo_toml)?;
-
-    std::fs::write(dir_path.join("Cargo.toml"), cargo_toml)?;
-
-    std::fs::create_dir(dir_path.join("src"))?;
-    std::fs::copy(src_path, dir_path.join("src").join("main.rs"))?;
-
-    Ok(dir_path)
-}
-
-pub(crate) fn expand_crate(path: &PathBuf) -> Result<(bool, Vec<u8>)> {
-    let cargo_expand = Command::new("cargo")
-        .arg("expand")
-        .current_dir(path)
-        .output()
-        .map_err(|e| Error::CargoExpandExecutionError(e.to_string()))?;
-
-    if !cargo_expand.status.success() {
-        return Ok((false, cargo_expand.stderr));
-    }
-
-    Ok((true, cargo_expand.stdout))
 }
