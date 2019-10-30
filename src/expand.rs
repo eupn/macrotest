@@ -1,13 +1,12 @@
 use std::path::PathBuf;
 use std::process::Command;
+use std::env;
 
 use tempdir::TempDir;
 use toml::{map::Map, Value};
 
 use crate::message::{message_different, message_expansion_error};
 use crate::{error::Error, error::Result, Expander, ExpansionOutcome, Test};
-
-use std::env;
 
 impl Expander {
     pub fn expand(&mut self) {
@@ -52,9 +51,8 @@ impl Expander {
             }
         }
 
-        println!("\n\n");
-
         if failures > 0 {
+            eprintln!("\n\n");
             panic!("{} of {} tests failed", failures, len);
         }
     }
@@ -68,13 +66,11 @@ struct ExpandedTest {
 impl ExpandedTest {
     pub fn run(&self) -> Result<ExpansionOutcome> {
         let temp_crate = make_tmp_cargo_crate_for_src(&self.test.path)?;
-        let (success, output) = expand_crate(&temp_crate)?;
+        let (success, output_bytes) = expand_crate(&temp_crate)?;
 
         if !success {
-            return Ok(ExpansionOutcome::ExpandError(output));
+            return Ok(ExpansionOutcome::ExpandError(output_bytes));
         }
-
-        let output = normalize_expansion(&output);
 
         let file_stem = self
             .test
@@ -86,20 +82,26 @@ impl ExpandedTest {
         expanded.pop();
         let expanded = expanded.join(format!("{}.expanded.rs", file_stem));
 
+        let output = normalize_expansion(&output_bytes);
+
         if !expanded.exists() {
             std::fs::write(expanded, &output)?;
             std::fs::remove_dir_all(&temp_crate)?;
 
-            return Ok(ExpansionOutcome::New(output));
+            return Ok(ExpansionOutcome::New(output_bytes));
         }
 
-        let expected_expansion = std::fs::read(expanded)?;
+        let expected_expansion_bytes = std::fs::read(expanded)?;
+        let expected_expansion = String::from_utf8_lossy(&expected_expansion_bytes);
+
         std::fs::remove_dir_all(&temp_crate)?;
 
-        Ok(if output == expected_expansion {
+        let same = output.lines().eq(expected_expansion.lines());
+
+        Ok(if same {
             ExpansionOutcome::Same
         } else {
-            ExpansionOutcome::Different(expected_expansion, output)
+            ExpansionOutcome::Different(expected_expansion_bytes, output_bytes)
         })
     }
 }
@@ -107,16 +109,13 @@ impl ExpandedTest {
 // `cargo expand` does always produce some fixed amount of lines that should be ignored
 const CARGO_EXPAND_SKIP_LINES_COUNT: usize = 6;
 
-fn normalize_expansion(input: &[u8]) -> Vec<u8> {
+fn normalize_expansion(input: &[u8]) -> String {
     let code = String::from_utf8_lossy(input);
-    let lines = code
+    code
         .lines()
         .skip(CARGO_EXPAND_SKIP_LINES_COUNT)
-        .map(std::borrow::ToOwned::to_owned)
-        .collect::<Vec<_>>();
-    let lines = lines.join("\n");
-
-    lines.as_bytes().to_vec()
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn expand_globs(tests: &[Test]) -> Vec<ExpandedTest> {
