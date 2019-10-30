@@ -1,0 +1,20 @@
+language: rust
+os:
+  - linux
+  - osx
+  - windows
+
+rust:
+  - stable
+
+before_script:
+  - rustup toolchain install nightly
+  - rustup component add rustfmt
+  - cargo install cargo-expand
+
+script:
+  - cargo build --verbose --all
+  - cd test-project
+  - cargo test -- --nocapture
+  - cd ../test-procmacro-project
+  - cargo test -- --nocapture
