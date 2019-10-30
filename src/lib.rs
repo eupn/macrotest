@@ -44,6 +44,10 @@
 //!
 //! A **nigthly** compiler is required for this tool to operate, so it must be installed as well.
 //!
+//! `cargo-expand` uses [`rustfmt`](https://github.com/rust-lang/rustfmt) to format expanded code.
+//! It's advised to install it, since examples in `test-project/` and `test-procmacro-project/`
+//! folders are using formatted version of expanded code to compare with.
+//!
 //! ## Setting up a test project
 //!
 //! Inside your crate that provides procedural or declarative macros, create a test case
