@@ -47,6 +47,7 @@ Possible test outcomes are:
 - **Refresh**: `.expanded.rs` didn't exist and has been created
 
 *NB*: after execution of each test, a temporary folder with the crate is removed automatically.
+
 *NB*: following code is removed from the expansion result:
 
 <details>
