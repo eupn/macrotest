@@ -19,7 +19,10 @@ pub(crate) fn message_different(name: &str, a: &[u8], b: &[u8]) {
 
     eprintln!("{} - different!", name);
 
-    eprintln!("Diff [lines: {} added, {} removed]:", lines_added, lines_removed);
+    eprintln!(
+        "Diff [lines: {} added, {} removed]:",
+        lines_added, lines_removed
+    );
     eprintln!("--------------------------");
 
     for i in 0..diffs.len() {
