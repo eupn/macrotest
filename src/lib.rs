@@ -16,23 +16,17 @@
 //! }
 //! ```
 //!
-//! The test can be run with `cargo test`. It will individually extract each of
-//! the source files matches the glob pattern as `main.rs` in a separate `cargo` crate in
-//! temporary folder and will invoke `cargo expand` to expand macro invocations.
+//! The test can be run with `cargo test`. This test will invoke `cargo expand` command on each of
+//! the source files matches the glob pattern and will compare expansion result with
+//! corresponding `*.expanded.rs` file.
 //!
-//! Project's crate will listed under `[dependencies]` section of temporary crates and will be
-//! available from the test cases.
-//!
-//! Expansion result is compared with the corresponding `.expanded.rs` file (same file name as
-//! the test except with a different extension). If file doesn't exists, it will create a new one
+//! If `*.expanded.rs` file doesn't exists, it will create a new one
 //! (this is how you update your tests).
 //!
 //! Possible test outcomes are:
 //! - **Pass**: expansion succeeded and result is the same as in `.expanded.rs` file
 //! - **Fail**: expansion is different from the `.expanded.rs` file content. This will print a diff
 //! - **Refresh**: `.expanded.rs` didn't exist and has been created
-//!
-//! *NB*: after execution of each test, a temporary folder with the crate is removed automatically.
 //!
 //! # Workflow
 //!
