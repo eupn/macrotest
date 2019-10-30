@@ -2,11 +2,10 @@ use std::convert::From;
 
 #[derive(Debug)]
 pub(crate) enum Error {
+    Cargo(std::io::Error),
     CargoExpandExecutionError(String),
-    #[allow(dead_code)]
     CargoFail,
-    #[allow(dead_code)]
-    CargoMetadata,
+    CargoMetadata(serde_json::error::Error),
     IoError(std::io::Error),
     TomlSerError(toml::ser::Error),
     TomlDeError(toml::de::Error),
@@ -23,9 +22,10 @@ impl std::fmt::Display for Error {
         use self::Error::*;
 
         match self {
-            CargoExpandExecutionError(e) => write!(f, "Failed to execute cargo expand: {}", e),
+            Cargo(e) => write!(f, "{}", e),
+            CargoExpandExecutionError(e) => write!(f, "Failed to execute cargo command: {}", e),
             CargoFail => write!(f, "cargo reported an error"),
-            CargoMetadata => write!(f, "cargo metadata error"),
+            CargoMetadata(e) => write!(f, "{}", e),
             IoError(e) => write!(f, "{}", e),
             TomlSerError(e) => write!(f, "{}", e),
             TomlDeError(e) => write!(f, "{}", e),

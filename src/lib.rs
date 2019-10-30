@@ -80,9 +80,17 @@ use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::thread;
 
+#[macro_use]
+mod path;
+
+mod cargo;
+mod dependencies;
 mod error;
 mod expand;
+mod features;
+mod manifest;
 mod message;
+mod rustflags;
 
 #[derive(Debug)]
 enum ExpansionOutcome {
