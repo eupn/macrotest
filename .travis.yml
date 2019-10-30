@@ -2,12 +2,6 @@ language: rust
 os: osx
 rust:
   - stable
-  - beta
-  - nightly
-jobs:
-  allow_failures:
-    - rust: nightly
-  fast_finish: true
 
 before_script:
   - rustup toolchain install nightly
