@@ -1,6 +1,6 @@
 [package]
 name = "macrotest"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["eupn <eupn@protonmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -9,9 +9,7 @@ repository = "https://github.com/eupn/macrotest"
 description = "Test harness for macro expansion"
 
 [dependencies]
-derive_more = "0.15.0"
 difference = "2.0.0"
-failure = "0.1.6"
 glob = "0.3"
 tempdir = "0.3.7"
 toml = "0.5.3"
