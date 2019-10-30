@@ -7,9 +7,19 @@ pub(crate) fn message_different(name: &str, a: &[u8], b: &[u8]) {
 
     let Changeset { diffs, .. } = Changeset::new(&a, &b, "\n");
 
+    let mut lines_added = 0;
+    let mut lines_removed = 0;
+    for diff in &diffs {
+        match diff {
+            Difference::Add(s) => lines_added += s.lines().count(),
+            Difference::Rem(s) => lines_removed += s.lines().count(),
+            _ => (),
+        }
+    }
+
     eprintln!("{} - different!", name);
 
-    eprintln!("Diff:");
+    eprintln!("Diff [lines: {} added, {} removed]:", lines_added, lines_removed);
     eprintln!("--------------------------");
 
     for i in 0..diffs.len() {
