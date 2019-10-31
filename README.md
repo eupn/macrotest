@@ -26,8 +26,7 @@ Under project's `tests/` directory create `tests.rs`:
 ```rust
 #[test]
 pub fn pass() {
-    let t = macrotest::TestCases::new();
-    t.pass("tests/expand/*.rs");
+    macrotest::expand("tests/expand/*.rs");
 }
 ```
 
@@ -39,9 +38,9 @@ If `*.expanded.rs` file doesn't exists, it will create a new one
 (this is how you update your tests).
 
 Possible test outcomes are:
-- **Pass**: expansion succeeded and a result is the same as in `.expanded.rs` file
-- **Fail**: expansion is different from the `.expanded.rs` file content. This will print a diff
-- **Refresh**: `.expanded.rs` didn't exist and has been created
+- **Pass**: expansion succeeded and a result is the same as in `*.expanded.rs` file
+- **Fail**: expansion is different from the `*.expanded.rs` file content. This will print a diff
+- **Refresh**: `*.expanded.rs` didn't exist and has been created
 
 *NB*: following code is removed from the expansion result:
 
@@ -85,21 +84,20 @@ Then, under the `tests` directory, create `tests.rs` file that will run the test
 ```rust
 #[test]
 pub fn pass() {
-    let t = macrotest::TestCases::new();
-    t.pass("tests/expand/*.rs");
+    macrotest::expand("tests/expand/*.rs");
 }
 ```
 
 And then you can run `cargo test` to
 
-1. For the first time, generate the `.expanded.rs` files for each of the test cases under
+1. For the first time, generate the `*.expanded.rs` files for each of the test cases under
 the `expand` directory
 1. After that, test cases' expansion result will be compared with the
-content of `.expanded.rs` files
+content of `*.expanded.rs` files
 
-### Updating `.expanded.rs`
+### Updating `*.expanded.rs`
 
-Just remove the `.expanded.rs` files and re-run the corresponding tests. Files will be created
+Just remove the `*.expanded.rs` files and re-run the tests. Files will be created
 automatically; hand-writing them is not recommended.
 
 [trybuild]: https://github.com/dtolnay/trybuild
