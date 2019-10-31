@@ -11,8 +11,7 @@
 //! ```rust
 //! #[test]
 //! pub fn pass() {
-//!     let t = macrotest::TestCases::new();
-//!     t.pass("tests/expand/*.rs");
+//!     macrotest::expand("tests/expand/*.rs");
 //! }
 //! ```
 //!
@@ -55,8 +54,7 @@
 //! ```rust
 //! #[test]
 //! pub fn pass() {
-//!     let t = macrotest::TestCases::new();
-//!     t.pass("tests/expand/*.rs");
+//!     macrotest::expand("tests/expand/*.rs");
 //! }
 //! ```
 //!
@@ -76,10 +74,6 @@
 
 #![crate_type = "lib"]
 
-use std::cell::RefCell;
-use std::path::{Path, PathBuf};
-use std::thread;
-
 #[macro_use]
 mod path;
 
@@ -92,48 +86,12 @@ mod manifest;
 mod message;
 mod rustflags;
 
+pub use expand::expand;
+
 #[derive(Debug)]
 enum ExpansionOutcome {
     Same,
     Different(Vec<u8>, Vec<u8>),
     New(Vec<u8>),
     ExpandError(Vec<u8>),
-}
-
-#[derive(Debug)]
-pub struct TestCases {
-    inner: RefCell<Expander>,
-}
-
-#[derive(Debug)]
-struct Expander {
-    tests: Vec<Test>,
-}
-
-#[derive(Clone, Debug)]
-struct Test {
-    path: PathBuf,
-}
-
-impl TestCases {
-    pub fn new() -> Self {
-        TestCases {
-            inner: RefCell::new(Expander { tests: Vec::new() }),
-        }
-    }
-
-    pub fn pass<P: AsRef<Path>>(&self, path: P) {
-        self.inner.borrow_mut().tests.push(Test {
-            path: path.as_ref().to_owned(),
-        });
-    }
-}
-
-#[doc(hidden)]
-impl Drop for TestCases {
-    fn drop(&mut self) {
-        if !thread::panicking() {
-            self.inner.borrow_mut().expand();
-        }
-    }
 }
