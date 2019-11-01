@@ -1,3 +1,6 @@
+#![crate_type = "lib"]
+#![doc(html_root_url = "https://docs.rs/macrotest/0.1.5")]
+
 //! #### &emsp; Test harness for macro expansion.
 //!
 //! Similar to [trybuild], but allows you to write tests on how macros are expanded.
@@ -15,41 +18,39 @@
 //! }
 //! ```
 //!
-//! The test can be run with `cargo test`. This test will invoke `cargo expand` command on each of
-//! the source files matches the glob pattern and will compare expansion result with
-//! corresponding `*.expanded.rs` file.
+//! The test can be run with `cargo test`. This test will invoke the [`cargo expand`] command
+//! on each of the source files that matches the glob pattern and will compare the expansion result
+//! with the corresponding `*.expanded.rs` file.
 //!
-//! If `*.expanded.rs` file doesn't exists, it will create a new one
-//! (this is how you update your tests).
+//! If a `*.expanded.rs` file doesn't exists, it will be created (this is how you update your tests).
 //!
 //! Possible test outcomes are:
-//! - **Pass**: expansion succeeded and result is the same as in `.expanded.rs` file
-//! - **Fail**: expansion is different from the `.expanded.rs` file content. This will print a diff
+//! - **Pass**: expansion succeeded and the result is the same as in the `.expanded.rs` file
+//! - **Fail**: expansion was different from the `.expanded.rs` file content
 //! - **Refresh**: `.expanded.rs` didn't exist and has been created
 //!
 //! # Workflow
 //!
-//! First of all, the `cargo-expand` tool must be present. You can install it via cargo:
+//! First of all, the [`cargo expand`] tool must be present. You can install it via cargo:
 //!
 //! ```bash
 //! cargo install cargo-expand
 //! ```
 //!
-//! A **nigthly** compiler is required for this tool to operate, so it must be installed as well.
+//! A **nightly** compiler is required for this tool to work, so it must be installed as well.
 //!
 //! `cargo-expand` uses [`rustfmt`](https://github.com/rust-lang/rustfmt) to format expanded code.
-//! It's advised to install it, since examples in `test-project/` and `test-procmacro-project/`
-//! folders are using formatted version of expanded code to compare with.
+//! It's highly recommended to install it since the examples in the `test-project/` and
+//! `test-procmacro-project/` folders are using a formatted version of the expanded code
+//! to compare with.
 //!
 //! ## Setting up a test project
 //!
-//! Inside your crate that provides procedural or declarative macros, create a test case
-//! under `tests` directory.
+//! In your crate that provides procedural or declarative macros, under the `tests` directory,
+//! create an `expand` directory and populate it with different expansion test cases as
+//! rust source files.
 //!
-//! Under the `tests` directory create an `expand` directory and populate it with
-//! different expansion test cases as Rust source files.
-//!
-//! Then, udner the `tests` directory, create `tests.rs` file that will run the tests:
+//! Then create a `tests.rs` file that will run the tests:
 //!
 //! ```rust
 //! #[test]
@@ -58,21 +59,20 @@
 //! }
 //! ```
 //!
-//! And then you can run `cargo test` to
+//! And then you can run `cargo test`, which will
 //!
-//! 1. For the first time, generate the `.expanded.rs` files for each of the test cases under
+//! 1. On the first run, generate the `*.expanded.rs` files for each of the test cases under
 //! the `expand` directory
-//! 1. After that, test cases' expansion result will be compared with the
-//! content of `.expanded.rs` files
+//! 1. On subsequent runs, compare test cases' expansion result with the
+//! content of the respective `*.expanded.rs` files
 //!
 //! ## Updating `.expanded.rs`
 //!
-//! Just remove the `.expanded.rs` files and re-run the corresponding tests. Files will be created
+//! Just remove the `*.expanded.rs` files and re-run the corresponding tests. Files will be created
 //! automatically; hand-writing them is not recommended.
 //!
 //! [trybuild]: https://github.com/dtolnay/trybuild
-
-#![crate_type = "lib"]
+//! [`cargo expand`]: https://github.com/dtolnay/cargo-expand
 
 #[macro_use]
 mod path;
