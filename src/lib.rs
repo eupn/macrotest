@@ -1,3 +1,6 @@
+#![crate_type = "lib"]
+#![doc(html_root_url = "https://docs.rs/macrotest/0.1.5")]
+
 //! #### &emsp; Test harness for macro expansion.
 //!
 //! Similar to [trybuild], but allows you to write tests on how macros are expanded.
@@ -70,8 +73,6 @@
 //!
 //! [trybuild]: https://github.com/dtolnay/trybuild
 //! [`cargo expand`]: https://github.com/dtolnay/cargo-expand
-
-#![crate_type = "lib"]
 
 #[macro_use]
 mod path;
