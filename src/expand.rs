@@ -56,7 +56,7 @@ pub fn expand(path: impl AsRef<Path>) {
                     failures += 1;
                 }
 
-                ExpansionOutcome::New(_) => println!("{} - refreshed", file_stem),
+                ExpansionOutcome::New(_) => eprintln!("{}.expanded.rs - refreshed", file_stem),
 
                 ExpansionOutcome::ExpandError(msg) => {
                     message_expansion_error(msg);
