@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use crate::cargo;
@@ -56,7 +57,9 @@ pub fn expand(path: impl AsRef<Path>) {
                     failures += 1;
                 }
 
-                ExpansionOutcome::New(_) => eprintln!("{}.expanded.rs - refreshed", file_stem),
+                ExpansionOutcome::New(_) => {
+                    let _ = writeln!(std::io::stderr(), "{}.expanded.rs - refreshed", file_stem);
+                }
 
                 ExpansionOutcome::ExpandError(msg) => {
                     message_expansion_error(msg);
