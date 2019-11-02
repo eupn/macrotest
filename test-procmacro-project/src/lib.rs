@@ -1,8 +1,8 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 
-use syn::{parse_macro_input, DeriveInput};
 use quote::quote;
+use syn::{parse_macro_input, DeriveInput};
 
 /// Example of [function-like procedural macro][1].
 ///
