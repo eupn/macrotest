@@ -1,18 +1,18 @@
-use difference::{Changeset, Difference};
+use diff::Result;
 
 /// Prints the difference of the two snippets of expanded code.
 pub(crate) fn message_different(name: &str, a: &[u8], b: &[u8]) {
     let a = String::from_utf8_lossy(&a);
     let b = String::from_utf8_lossy(&b);
 
-    let Changeset { diffs, .. } = Changeset::new(&a, &b, "\n");
+    let changes = diff::lines(&a, &b);
 
     let mut lines_added = 0;
     let mut lines_removed = 0;
-    for diff in &diffs {
+    for diff in &changes {
         match diff {
-            Difference::Add(s) => lines_added += s.lines().count(),
-            Difference::Rem(s) => lines_removed += s.lines().count(),
+            Result::Left(_) => lines_added += 1,
+            Result::Right(_) => lines_removed += 1,
             _ => (),
         }
     }
@@ -25,22 +25,16 @@ pub(crate) fn message_different(name: &str, a: &[u8], b: &[u8]) {
     );
     eprintln!("--------------------------");
 
-    for i in 0..diffs.len() {
-        match diffs[i] {
-            Difference::Same(ref x) => {
-                for line in x.lines() {
-                    eprintln!(" {}", line);
-                }
+    for change in changes {
+        match change {
+            Result::Both(x, _) => {
+                eprintln!(" {}", x);
             }
-            Difference::Add(ref x) => {
-                for line in x.lines() {
-                    eprintln!("+{}", line);
-                }
+            Result::Left(x) => {
+                eprintln!("+{}", x);
             }
-            Difference::Rem(ref x) => {
-                for line in x.lines() {
-                    eprintln!("-{}", line);
-                }
+            Result::Right(x) => {
+                eprintln!("-{}", x);
             }
         }
     }

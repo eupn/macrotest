@@ -233,6 +233,7 @@ impl ExpandedTest {
         Ok(if same {
             ExpansionOutcome::Same
         } else {
+            let output_bytes = output.into_bytes(); // Use normalized text for a message
             ExpansionOutcome::Different(expected_expansion_bytes, output_bytes)
         })
     }
