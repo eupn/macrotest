@@ -220,7 +220,7 @@ impl ExpandedTest {
         let output = normalize_expansion(&output_bytes);
 
         if !expanded.exists() {
-            // Write a .expanded.rs file contents with an empty line at the end
+            // Write a .expanded.rs file contents with an newline character at the end
             std::fs::write(expanded, &format!("{}\n", output))?;
 
             return Ok(ExpansionOutcome::New(output_bytes));
