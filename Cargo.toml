@@ -1,6 +1,6 @@
 [package]
 name = "macrotest"
-version = "0.1.5" # remember to update in lib.rs
+version = "0.1.6" # remember to update in lib.rs
 authors = ["eupn <eupn@protonmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -14,4 +14,3 @@ glob = "0.3"
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-
