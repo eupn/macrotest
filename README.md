@@ -6,7 +6,7 @@
 [![Crates.io](https://img.shields.io/crates/d/macrotest)](https://crates.io/crates/macrotest)
 [![Crates.io](https://img.shields.io/crates/l/macrotest)](https://crates.io/crates/macrotest)
 
-Similar to [trybuild], but allows you to write tests on how macros are expanded.
+Similar to [trybuild], but allows you to test how declarative or procedural macros are expanded.
 
 ----
 
@@ -18,16 +18,14 @@ Please refer to the [documentation](https://docs.rs/macrotest).
 
 Install nightly rust, [`cargo expand`] and [`rustfmt`].
 
-A minimal `macrotest` setup looks like this:
-
-In project's Cargo.toml:
+Add to your crate's Cargo.toml:
 
 ```toml
 [dev-dependencies]
 macrotest = "0.1"
 ```
 
-Under project's `tests/` directory create `tests.rs`:
+Under your crate's `tests/` directory, create `tests.rs` file containing the following code:
 
 ```rust
 #[test]
@@ -36,7 +34,9 @@ pub fn pass() {
 }
 ```
 
-Populate the `/tests/expand` directory with rust source files. Each file is a macro expansion test case.
+Populate the `tests/expand/` directory with rust source files. Each source file is a macro expansion test case.
+
+See [test-project](test-project) and [test-procmacro-project](test-procmacro-project) for the reference.
 
 [trybuild]: https://github.com/dtolnay/trybuild
 [`cargo expand`]: https://github.com/dtolnay/cargo-expand

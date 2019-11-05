@@ -87,11 +87,3 @@ mod message;
 mod rustflags;
 
 pub use expand::expand;
-
-#[derive(Debug)]
-enum ExpansionOutcome {
-    Same,
-    Different(Vec<u8>, Vec<u8>),
-    New(Vec<u8>),
-    ExpandError(Vec<u8>),
-}
