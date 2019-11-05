@@ -9,7 +9,10 @@ use crate::features;
 use crate::manifest::{Bin, Build, Config, Manifest, Name, Package, Workspace};
 use crate::message::{message_different, message_expansion_error};
 use crate::rustflags;
-use crate::{error::Error, error::Result, ExpansionOutcome};
+use crate::{error::Error, error::Result};
+
+/// An extension for files containing `cargo expand` result.
+const EXPANDED_RS_SUFFIX: &str = ".expanded.rs";
 
 #[derive(Debug)]
 pub(crate) struct Project {
@@ -29,7 +32,7 @@ pub(crate) struct Project {
 pub fn expand(path: impl AsRef<Path>) {
     let tests = expand_globs(&path)
         .into_iter()
-        .filter(|t| !t.test.to_string_lossy().ends_with(".expanded.rs"))
+        .filter(|t| !t.test.to_string_lossy().ends_with(EXPANDED_RS_SUFFIX))
         .collect::<Vec<_>>();
 
     let len = tests.len();
@@ -58,7 +61,12 @@ pub fn expand(path: impl AsRef<Path>) {
                 }
 
                 ExpansionOutcome::New(_) => {
-                    let _ = writeln!(std::io::stderr(), "{}.expanded.rs - refreshed", file_stem);
+                    let _ = writeln!(
+                        std::io::stderr(),
+                        "{}{} - refreshed",
+                        file_stem,
+                        EXPANDED_RS_SUFFIX
+                    );
                 }
 
                 ExpansionOutcome::ExpandError(msg) => {
@@ -226,7 +234,7 @@ impl ExpandedTest {
             .into_owned();
         let mut expanded = self.test.clone();
         expanded.pop();
-        let expanded = expanded.join(format!("{}.expanded.rs", file_stem));
+        let expanded = expanded.join(format!("{}{}", file_stem, EXPANDED_RS_SUFFIX));
 
         let output = normalize_expansion(&output_bytes);
 
