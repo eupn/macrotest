@@ -196,6 +196,14 @@ fn make_config() -> Config {
     }
 }
 
+#[derive(Debug)]
+enum ExpansionOutcome {
+    Same,
+    Different(Vec<u8>, Vec<u8>),
+    New(Vec<u8>),
+    ExpandError(Vec<u8>),
+}
+
 struct ExpandedTest {
     name: Name,
     test: PathBuf,
