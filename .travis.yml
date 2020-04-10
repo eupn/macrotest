@@ -19,8 +19,8 @@ before_script:
 script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export TARGET=--target=x86_64-pc-windows-msvc; fi
   - cargo build $TARGET --verbose --all
-  - cargo $TARGET test
+  - cargo test
   - cd test-project
-  - cargo $TARGET test -- --nocapture
+  - cargo test -- --nocapture
   - cd ../test-procmacro-project
-  - cargo $TARGET test -- --nocapture
+  - cargo test -- --nocapture
