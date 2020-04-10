@@ -13,7 +13,8 @@ install:
 before_script:
   - rustup toolchain install nightly
   - rustup component add rustfmt
-  - cargo install cargo-expand
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export TARGET=--target=x86_64-pc-windows-msvc; fi
+  - cargo install $TARGET cargo-expand
 
 script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export TARGET=--target=x86_64-pc-windows-msvc; fi
