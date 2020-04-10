@@ -7,13 +7,18 @@ os:
 rust:
   - stable
 
+install:
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then rustup target add x86_64-pc-windows-msvc; fi
+
 before_script:
   - rustup toolchain install nightly
   - rustup component add rustfmt
-  - cargo install cargo-expand
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export TARGET=--target=x86_64-pc-windows-msvc; fi
+  - cargo install $TARGET cargo-expand
 
 script:
-  - cargo build --verbose --all
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export TARGET=--target=x86_64-pc-windows-msvc; fi
+  - cargo build $TARGET --verbose --all
   - cargo test
   - cd test-project
   - cargo test -- --nocapture
