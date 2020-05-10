@@ -23,10 +23,42 @@ pub(crate) struct Project {
 
 /// Attempts to expand macros in files that match glob pattern.
 ///
+/// # Refresh behavior
+///
+/// If no matching `.expanded.rs` files present, they will be created and result of expansion
+/// will be written into them.
+///
 /// # Panics
 ///
-/// Will panic in case of expansion test failure.
+/// Will panic if matching `.expanded.rs` file is present, but has different expanded code in it.
 pub fn expand(path: impl AsRef<Path>) {
+    run_tests(path, ExpansionBehavior::RegenerateFiles);
+}
+
+/// Attempts to expand macros in files that match glob pattern.
+/// More strict version of [`expand`] function.
+///
+/// # Refresh behavior
+///
+/// If no matching `.expanded.rs` files present, it considered a failed test.
+///
+/// # Panics
+///
+/// Will panic if no matching `.expanded.rs` file is present. Otherwise it will exhibit the same
+/// behavior as in [`expand`].
+///
+/// [`expand`]: /expand
+pub fn expand_without_refresh(path: impl AsRef<Path>) {
+    run_tests(path, ExpansionBehavior::ExpectFiles);
+}
+
+#[derive(Debug, Copy, Clone)]
+enum ExpansionBehavior {
+    RegenerateFiles,
+    ExpectFiles,
+}
+
+fn run_tests(path: impl AsRef<Path>, expansion_behavior: ExpansionBehavior) {
     let tests = expand_globs(&path)
         .into_iter()
         .filter(|t| !t.test.to_string_lossy().ends_with(".expanded.rs"))
@@ -48,7 +80,7 @@ pub fn expand(path: impl AsRef<Path>) {
             .to_string_lossy()
             .into_owned();
 
-        match test.run(&project) {
+        match test.run(&project, expansion_behavior) {
             Ok(outcome) => match outcome {
                 ExpansionOutcome::Same => println!("{} - ok", file_stem),
 
@@ -63,6 +95,14 @@ pub fn expand(path: impl AsRef<Path>) {
 
                 ExpansionOutcome::ExpandError(msg) => {
                     message_expansion_error(msg);
+                    failures += 1;
+                }
+                ExpansionOutcome::NoExpandedFileFound => {
+                    let _ = writeln!(
+                        std::io::stderr(),
+                        "{}.expanded.rs is expected but not found",
+                        file_stem
+                    );
                     failures += 1;
                 }
             },
@@ -203,7 +243,11 @@ struct ExpandedTest {
 }
 
 impl ExpandedTest {
-    pub fn run(&self, project: &Project) -> Result<ExpansionOutcome> {
+    pub fn run(
+        &self,
+        project: &Project,
+        expansion_behavior: ExpansionBehavior,
+    ) -> Result<ExpansionOutcome> {
         let (success, output_bytes) = cargo::expand(project, &self.name)?;
 
         if !success {
@@ -223,6 +267,10 @@ impl ExpandedTest {
         let output = normalize_expansion(&output_bytes);
 
         if !expanded.exists() {
+            if matches!(expansion_behavior, ExpansionBehavior::ExpectFiles) {
+                return Ok(ExpansionOutcome::NoExpandedFileFound);
+            }
+
             // Write a .expanded.rs file contents with an newline character at the end
             std::fs::write(expanded, &format!("{}\n", output))?;
 
