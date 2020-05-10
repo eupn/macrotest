@@ -1,5 +1,5 @@
 #![crate_type = "lib"]
-#![doc(html_root_url = "https://docs.rs/macrotest/1.0.0")]
+#![doc(html_root_url = "https://docs.rs/macrotest/1.0.2")]
 
 //! #### &emsp; Test harness for macro expansion.
 //!
@@ -15,6 +15,8 @@
 //! #[test]
 //! pub fn pass() {
 //!     macrotest::expand("tests/expand/*.rs");
+//!     // Alternatively,
+//!     macrotest::expand_without_refresh("tests/expand/*.rs");
 //! }
 //! ```
 //!
@@ -22,12 +24,14 @@
 //! on each of the source files that matches the glob pattern and will compare the expansion result
 //! with the corresponding `*.expanded.rs` file.
 //!
-//! If a `*.expanded.rs` file doesn't exists, it will be created (this is how you update your tests).
+//! If a `*.expanded.rs` file doesn't exists and it's not explicitly expected to (see [`expand_without_refresh`]),
+//! it will be created (this is how you update your tests).
 //!
 //! Possible test outcomes are:
 //! - **Pass**: expansion succeeded and the result is the same as in the `.expanded.rs` file
 //! - **Fail**: expansion was different from the `.expanded.rs` file content
 //! - **Refresh**: `.expanded.rs` didn't exist and has been created
+//! - **Refresh-fail**: `.expanded.rs` is expected to be present, but not exists. See [`expand_without_refresh`].
 //!
 //! # Workflow
 //!
@@ -56,21 +60,33 @@
 //! #[test]
 //! pub fn pass() {
 //!     macrotest::expand("tests/expand/*.rs");
+//!     // Or:
+//!     macrotest::expand_without_refresh("tests/expand/*.rs");
 //! }
 //! ```
 //!
 //! And then you can run `cargo test`, which will
 //!
-//! 1. On the first run, generate the `*.expanded.rs` files for each of the test cases under
-//! the `expand` directory
-//! 1. On subsequent runs, compare test cases' expansion result with the
-//! content of the respective `*.expanded.rs` files
+//! 1. Expand macros in source files that match glob pattern
+//! 1. In case if [`expand`] function is used:
+//!     - On the first run, generate the `*.expanded.rs` files for each of the test cases under
+//!     the `expand` directory
+//!     - On subsequent runs, compare test cases' expansion result with the
+//!     content of the respective `*.expanded.rs` files
+//! 1. In case if [`expand_without_refresh`] is used:
+//!     - On each run, it will compare test cases' expansion result with the content of the
+//!     respective `*.expanded.rs` files.
+//!     - If one or more `*.expanded.rs` files is not found, the test will fail.
 //!
 //! ## Updating `.expanded.rs`
 //!
-//! Just remove the `*.expanded.rs` files and re-run the corresponding tests. Files will be created
+//! This applicable only to tests that are using [`expand`] function.
+//!
+//! Remove the `*.expanded.rs` files and re-run the corresponding tests. Files will be created
 //! automatically; hand-writing them is not recommended.
 //!
+//! [`expand_without_refresh`]: expand/fn.expand_without_refresh.html
+//! [`expand`]: expand/fn.expand.html
 //! [trybuild]: https://github.com/dtolnay/trybuild
 //! [`cargo expand`]: https://github.com/dtolnay/cargo-expand
 
@@ -87,3 +103,4 @@ mod message;
 mod rustflags;
 
 pub use expand::expand;
+pub use expand::expand_without_refresh;
