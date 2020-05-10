@@ -250,6 +250,7 @@ enum ExpansionOutcome {
     Different(Vec<u8>, Vec<u8>),
     New(Vec<u8>),
     ExpandError(Vec<u8>),
+    NoExpandedFileFound,
 }
 
 struct ExpandedTest {
