@@ -93,5 +93,6 @@ enum ExpansionOutcome {
     Same,
     Different(Vec<u8>, Vec<u8>),
     New(Vec<u8>),
+    NoExpandedFileFound,
     ExpandError(Vec<u8>),
 }
