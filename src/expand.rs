@@ -47,7 +47,7 @@ pub fn expand(path: impl AsRef<Path>) {
 /// Will panic if no matching `.expanded.rs` file is present. Otherwise it will exhibit the same
 /// behavior as in [`expand`].
 ///
-/// [`expand`]: /expand
+/// [`expand`]: expand/fn.expand.html
 pub fn expand_without_refresh(path: impl AsRef<Path>) {
     run_tests(path, ExpansionBehavior::ExpectFiles);
 }
