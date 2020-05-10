@@ -87,6 +87,7 @@ mod message;
 mod rustflags;
 
 pub use expand::expand;
+pub use expand::expand_without_refresh;
 
 #[derive(Debug)]
 enum ExpansionOutcome {
