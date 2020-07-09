@@ -3,7 +3,7 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use rand::{thread_rng, Rng, distributions::Alphanumeric};
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
 use crate::cargo;
 use crate::dependencies::{self, Dependency};
@@ -31,7 +31,11 @@ pub(crate) struct Project {
 impl Drop for Project {
     fn drop(&mut self) {
         if let Err(e) = fs::remove_dir_all(&self.dir) {
-            eprintln!("Failed to cleanup the directory `{}`: {}", self.dir.to_string_lossy(), e);
+            eprintln!(
+                "Failed to cleanup the directory `{}`: {}",
+                self.dir.to_string_lossy(),
+                e
+            );
         }
     }
 }
@@ -155,10 +159,7 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
 
     // Use random string for the crate dir to
     // prevent conflicts when running parallel tests.
-    let rand_string: String = thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(42)
-        .collect();
+    let rand_string: String = thread_rng().sample_iter(&Alphanumeric).take(42).collect();
 
     let mut project = Project {
         dir: path!(target_dir / "tests" / crate_name / rand_string),

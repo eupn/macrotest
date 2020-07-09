@@ -128,7 +128,7 @@ fn get_true() -> bool {
     true
 }
 
-fn is_true(boolean: &bool) -> bool {
+fn is_true(boolean: bool) -> bool {
     *boolean
 }
 

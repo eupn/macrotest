@@ -84,13 +84,13 @@ pub(crate) fn build_dependencies(project: &Project) -> Result<()> {
         .filter(|line| !line.starts_with("fn main() {}"))
         .filter(|line| !line_should_be_ignored(line))
         .for_each(|line| {
-            let _ = write!(std::io::stdout(), "{}\n", line);
+            let _ = writeln!(std::io::stdout(), "{}", line);
         });
 
     Ok(())
 }
 
-const IGNORED_LINES: [&'static str; 5] = [
+const IGNORED_LINES: [&str; 5] = [
     "#![feature(prelude_import)]",
     "#[prelude_import]",
     "use std::prelude::v1::*;",
