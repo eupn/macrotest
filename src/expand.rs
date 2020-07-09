@@ -3,6 +3,8 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+use rand::{thread_rng, Rng, distributions::Alphanumeric};
+
 use crate::cargo;
 use crate::dependencies::{self, Dependency};
 use crate::features;
@@ -141,8 +143,15 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
 
     let features = features::find();
 
+    // Use random string for the crate dir to
+    // prevent conflicts when running parallel tests.
+    let rand_string: String = thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(42)
+        .collect();
+
     let mut project = Project {
-        dir: path!(target_dir / "tests" / crate_name),
+        dir: path!(target_dir / "tests" / crate_name / rand_string),
         source_dir,
         target_dir,
         name: format!("{}-tests", crate_name),
