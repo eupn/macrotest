@@ -3,6 +3,8 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
+
 use crate::cargo;
 use crate::dependencies::{self, Dependency};
 use crate::features;
@@ -22,6 +24,20 @@ pub(crate) struct Project {
     pub name: String,
     pub features: Option<Vec<String>>,
     workspace: PathBuf,
+}
+
+/// This `Drop` implementation will clean up the temporary crates when expansion is finished.
+/// This is to prevent pollution of the filesystem with dormant files.
+impl Drop for Project {
+    fn drop(&mut self) {
+        if let Err(e) = fs::remove_dir_all(&self.dir) {
+            eprintln!(
+                "Failed to cleanup the directory `{}`: {}",
+                self.dir.to_string_lossy(),
+                e
+            );
+        }
+    }
 }
 
 /// Attempts to expand macros in files that match glob pattern.
@@ -141,8 +157,12 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
 
     let features = features::find();
 
+    // Use random string for the crate dir to
+    // prevent conflicts when running parallel tests.
+    let rand_string: String = thread_rng().sample_iter(&Alphanumeric).take(42).collect();
+
     let mut project = Project {
-        dir: path!(target_dir / "tests" / crate_name),
+        dir: path!(target_dir / "tests" / crate_name / rand_string),
         source_dir,
         target_dir,
         name: format!("{}-tests", crate_name),
