@@ -33,6 +33,13 @@
 //! - **Refresh**: `.expanded.rs` didn't exist and has been created
 //! - **Refresh-fail**: `.expanded.rs` is expected to be present, but not exists. See [`expand_without_refresh`].
 //!
+//! *Note:* when working with multiple expansion test files, it is recommended to
+//! specify wildcard (*.rs) instead of doing a multiple calls to `expand` functions for individual files.
+//! Usage of wildcards for multiple files will group them under a single temporary crate for which
+//! dependencies will be built a single time. In contrast, calling `expand` functions for each
+//! source file will create multiple temporary crates and that will reduce performance as depdendencies
+//! will be build for each of the temporary crates.
+//!
 //! # Workflow
 //!
 //! First of all, the [`cargo expand`] tool must be present. You can install it via cargo:
