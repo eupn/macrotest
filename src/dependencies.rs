@@ -128,7 +128,8 @@ fn get_true() -> bool {
     true
 }
 
-fn is_true(boolean: bool) -> bool {
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_true(boolean: &bool) -> bool {
     *boolean
 }
 
