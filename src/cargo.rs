@@ -1,13 +1,13 @@
+use std::ffi::OsStr;
+use std::io::BufRead;
 use std::path::PathBuf;
 use std::process::Command;
-
-use serde::Deserialize;
 
 use crate::error::{Error, Result};
 use crate::expand::Project;
 use crate::manifest::Name;
 use crate::rustflags;
-use std::io::BufRead;
+use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct Metadata {
@@ -40,13 +40,28 @@ pub(crate) fn metadata() -> Result<Metadata> {
     serde_json::from_slice(&output.stdout).map_err(Error::CargoMetadata)
 }
 
-pub(crate) fn expand(project: &Project, name: &Name) -> Result<(bool, Vec<u8>)> {
-    let cargo_expand = cargo(project)
+pub(crate) fn expand<I, S>(
+    project: &Project,
+    name: &Name,
+    args: &Option<I>,
+) -> Result<(bool, Vec<u8>)>
+where
+    I: IntoIterator<Item = S> + Clone,
+    S: AsRef<OsStr>,
+{
+    let mut cargo = cargo(project);
+    let cargo = cargo
         .arg("expand")
         .arg("--bin")
         .arg(name.as_ref())
         .arg("--theme")
-        .arg("none")
+        .arg("none");
+
+    if let Some(args) = args {
+        cargo.args(args.clone());
+    }
+
+    let cargo_expand = cargo
         .output()
         .map_err(|e| Error::CargoExpandExecutionError(e.to_string()))?;
 

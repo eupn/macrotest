@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsStr;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -51,7 +52,22 @@ impl Drop for Project {
 ///
 /// Will panic if matching `.expanded.rs` file is present, but has different expanded code in it.
 pub fn expand(path: impl AsRef<Path>) {
-    run_tests(path, ExpansionBehavior::RegenerateFiles);
+    run_tests(
+        path,
+        ExpansionBehavior::RegenerateFiles,
+        Option::<Vec<String>>::None,
+    );
+}
+
+/// Same as [`expand`] but allows to pass additional arguments to `cargo-expand`.
+///
+/// [`expand`]: expand/fn.expand.html
+pub fn expand_args<I, S>(path: impl AsRef<Path>, args: I)
+where
+    I: IntoIterator<Item = S> + Clone,
+    S: AsRef<OsStr>,
+{
+    run_tests(path, ExpansionBehavior::RegenerateFiles, Some(args));
 }
 
 /// Attempts to expand macros in files that match glob pattern.
@@ -68,7 +84,22 @@ pub fn expand(path: impl AsRef<Path>) {
 ///
 /// [`expand`]: expand/fn.expand.html
 pub fn expand_without_refresh(path: impl AsRef<Path>) {
-    run_tests(path, ExpansionBehavior::ExpectFiles);
+    run_tests(
+        path,
+        ExpansionBehavior::ExpectFiles,
+        Option::<Vec<String>>::None,
+    );
+}
+
+/// Same as [`expand_without_refresh`] but allows to pass additional arguments to `cargo-expand`.
+///
+/// [`expand_without_refresh`]: expand/fn.expand_without_refresh.html
+pub fn expand_without_refresh_args<I, S>(path: impl AsRef<Path>, args: I)
+where
+    I: IntoIterator<Item = S> + Clone,
+    S: AsRef<OsStr>,
+{
+    run_tests(path, ExpansionBehavior::ExpectFiles, Some(args));
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -77,7 +108,11 @@ enum ExpansionBehavior {
     ExpectFiles,
 }
 
-fn run_tests(path: impl AsRef<Path>, expansion_behavior: ExpansionBehavior) {
+fn run_tests<I, S>(path: impl AsRef<Path>, expansion_behavior: ExpansionBehavior, args: Option<I>)
+where
+    I: IntoIterator<Item = S> + Clone,
+    S: AsRef<OsStr>,
+{
     let tests = expand_globs(&path)
         .into_iter()
         .filter(|t| !t.test.to_string_lossy().ends_with(EXPANDED_RS_SUFFIX))
@@ -99,7 +134,7 @@ fn run_tests(path: impl AsRef<Path>, expansion_behavior: ExpansionBehavior) {
             .to_string_lossy()
             .into_owned();
 
-        match test.run(&project, expansion_behavior) {
+        match test.run(&project, expansion_behavior, &args) {
             Ok(outcome) => match outcome {
                 ExpansionOutcome::Same => println!("{} - ok", file_stem),
 
@@ -280,12 +315,17 @@ struct ExpandedTest {
 }
 
 impl ExpandedTest {
-    pub fn run(
+    pub fn run<I, S>(
         &self,
         project: &Project,
         expansion_behavior: ExpansionBehavior,
-    ) -> Result<ExpansionOutcome> {
-        let (success, output_bytes) = cargo::expand(project, &self.name)?;
+        args: &Option<I>,
+    ) -> Result<ExpansionOutcome>
+    where
+        I: IntoIterator<Item = S> + Clone,
+        S: AsRef<OsStr>,
+    {
+        let (success, output_bytes) = cargo::expand(project, &self.name, args)?;
 
         if !success {
             return Ok(ExpansionOutcome::ExpandError(output_bytes));

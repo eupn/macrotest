@@ -110,4 +110,6 @@ mod message;
 mod rustflags;
 
 pub use expand::expand;
+pub use expand::expand_args;
 pub use expand::expand_without_refresh;
+pub use expand::expand_without_refresh_args;

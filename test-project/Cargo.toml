@@ -5,5 +5,10 @@ edition = "2018"
 
 [lib]
 
+[features]
+default = []
+
+test-feature = []
+
 [dev-dependencies]
 macrotest = { path = "../" }
