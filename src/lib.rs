@@ -1,5 +1,5 @@
 #![crate_type = "lib"]
-#![doc(html_root_url = "https://docs.rs/macrotest/1.0.3")]
+#![doc(html_root_url = "https://docs.rs/macrotest/1.0.4")]
 
 //! #### &emsp; Test harness for macro expansion.
 //!
@@ -39,6 +39,30 @@
 //! dependencies will be built a single time. In contrast, calling `expand` functions for each
 //! source file will create multiple temporary crates and that will reduce performance as depdendencies
 //! will be build for each of the temporary crates.
+//!
+//! ## Passing additional arguments to `cargo expand`
+//!
+//! It's possible to specify additional arguments for [`cargo expand`] command.
+//!
+//! In order to do so, use the following functions with `_args` suffix:
+//! - [`expand_args`]
+//! - [`expand_without_refresh_args`]
+//!
+//! Example:
+//!
+//! ```rust
+//! pub fn pass() {
+//!     macrotest::expand_args("tests/expand/*.rs", &["--features", "my-feature"]);
+//!     // Or
+//!     macrotest::expand_without_refresh_args("tests/expand/*.rs", &["--features", "my-feature"]);
+//! }
+//! ```
+//!
+//! The `_args` functions will result in the following [`cargo expand`] command being run:
+//!
+//! ```bash
+//! cargo expand --bin <test-name> --theme none --features my-feature
+//! ```
 //!
 //! # Workflow
 //!
@@ -93,7 +117,9 @@
 //! automatically; hand-writing them is not recommended.
 //!
 //! [`expand_without_refresh`]: expand/fn.expand_without_refresh.html
+//! [`expand_without_refresh_args`]: expand/fn.expand_without_refresh_args.html
 //! [`expand`]: expand/fn.expand.html
+//! [`expand_args`]: expand/fn.expand_args.html
 //! [trybuild]: https://github.com/dtolnay/trybuild
 //! [`cargo expand`]: https://github.com/dtolnay/cargo-expand
 
