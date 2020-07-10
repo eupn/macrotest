@@ -52,7 +52,11 @@ impl Drop for Project {
 ///
 /// Will panic if matching `.expanded.rs` file is present, but has different expanded code in it.
 pub fn expand(path: impl AsRef<Path>) {
-    run_tests(path, ExpansionBehavior::RegenerateFiles, Option::<Vec<String>>::None);
+    run_tests(
+        path,
+        ExpansionBehavior::RegenerateFiles,
+        Option::<Vec<String>>::None,
+    );
 }
 
 /// Same as [`expand`] but allows to pass additional arguments to `cargo-expand`.
@@ -61,7 +65,8 @@ pub fn expand(path: impl AsRef<Path>) {
 pub fn expand_args<I, S>(path: impl AsRef<Path>, args: I)
 where
     I: IntoIterator<Item = S> + Clone,
-    S: AsRef<OsStr> {
+    S: AsRef<OsStr>,
+{
     run_tests(path, ExpansionBehavior::RegenerateFiles, Some(args));
 }
 
@@ -79,7 +84,11 @@ where
 ///
 /// [`expand`]: expand/fn.expand.html
 pub fn expand_without_refresh(path: impl AsRef<Path>) {
-    run_tests(path, ExpansionBehavior::ExpectFiles, Option::<Vec<String>>::None);
+    run_tests(
+        path,
+        ExpansionBehavior::ExpectFiles,
+        Option::<Vec<String>>::None,
+    );
 }
 
 /// Same as [`expand_without_refresh`] but allows to pass additional arguments to `cargo-expand`.
@@ -88,7 +97,8 @@ pub fn expand_without_refresh(path: impl AsRef<Path>) {
 pub fn expand_without_refresh_args<I, S>(path: impl AsRef<Path>, args: I)
 where
     I: IntoIterator<Item = S> + Clone,
-    S: AsRef<OsStr> {
+    S: AsRef<OsStr>,
+{
     run_tests(path, ExpansionBehavior::ExpectFiles, Some(args));
 }
 
@@ -101,7 +111,8 @@ enum ExpansionBehavior {
 fn run_tests<I, S>(path: impl AsRef<Path>, expansion_behavior: ExpansionBehavior, args: Option<I>)
 where
     I: IntoIterator<Item = S> + Clone,
-    S: AsRef<OsStr> {
+    S: AsRef<OsStr>,
+{
     let tests = expand_globs(&path)
         .into_iter()
         .filter(|t| !t.test.to_string_lossy().ends_with(EXPANDED_RS_SUFFIX))
@@ -312,7 +323,8 @@ impl ExpandedTest {
     ) -> Result<ExpansionOutcome>
     where
         I: IntoIterator<Item = S> + Clone,
-        S: AsRef<OsStr> {
+        S: AsRef<OsStr>,
+    {
         let (success, output_bytes) = cargo::expand(project, &self.name, args)?;
 
         if !success {
