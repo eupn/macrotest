@@ -344,7 +344,7 @@ impl ExpandedTest {
         let output = normalize_expansion(&output_bytes);
 
         if !expanded.exists() {
-            if matches!(expansion_behavior, ExpansionBehavior::ExpectFiles) {
+            if let ExpansionBehavior::ExpectFiles = expansion_behavior {
                 return Ok(ExpansionOutcome::NoExpandedFileFound);
             }
 
