@@ -111,10 +111,11 @@
 //!
 //! ## Updating `.expanded.rs`
 //!
-//! This applicable only to tests that are using [`expand`] function.
+//! This applicable only to tests that are using [`expand`] or [`expand_args`] function.
 //!
-//! Remove the `*.expanded.rs` files and re-run the corresponding tests. Files will be created
-//! automatically; hand-writing them is not recommended.
+//! Run tests with the environment variable `MACROTEST=overwrite` or remove the `*.expanded.rs`
+//! files and re-run the corresponding tests. Files will be created automatically; hand-writing
+//! them is not recommended.
 //!
 //! [`expand_without_refresh`]: expand/fn.expand_without_refresh.html
 //! [`expand_without_refresh_args`]: expand/fn.expand_without_refresh_args.html

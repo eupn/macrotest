@@ -25,6 +25,7 @@ pub(crate) struct Project {
     pub name: String,
     pub features: Option<Vec<String>>,
     workspace: PathBuf,
+    overwrite: bool,
 }
 
 /// This `Drop` implementation will clean up the temporary crates when expansion is finished.
@@ -143,7 +144,7 @@ where
                     failures += 1;
                 }
 
-                ExpansionOutcome::New(_) => {
+                ExpansionOutcome::Update(_) => {
                     let _ = writeln!(
                         std::io::stderr(),
                         "{}{} - refreshed",
@@ -196,6 +197,12 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
     // prevent conflicts when running parallel tests.
     let rand_string: String = thread_rng().sample_iter(&Alphanumeric).take(42).collect();
 
+    let overwrite = match env::var_os("MACROTEST") {
+        Some(v) if v == "overwrite" => true,
+        Some(v) => return Err(Error::UnrecognizedEnv(v)),
+        None => false,
+    };
+
     let mut project = Project {
         dir: path!(target_dir / "tests" / crate_name / rand_string),
         source_dir,
@@ -203,6 +210,7 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
         name: format!("{}-tests", crate_name),
         features,
         workspace,
+        overwrite,
     };
 
     let manifest = make_manifest(crate_name, &project, tests)?;
@@ -303,7 +311,7 @@ fn make_config() -> Config {
 enum ExpansionOutcome {
     Same,
     Different(Vec<u8>, Vec<u8>),
-    New(Vec<u8>),
+    Update(Vec<u8>),
     ExpandError(Vec<u8>),
     NoExpandedFileFound,
 }
@@ -339,7 +347,7 @@ impl ExpandedTest {
             .into_owned();
         let mut expanded = self.test.clone();
         expanded.pop();
-        let expanded = expanded.join(format!("{}{}", file_stem, EXPANDED_RS_SUFFIX));
+        let expanded = &expanded.join(format!("{}{}", file_stem, EXPANDED_RS_SUFFIX));
 
         let output = normalize_expansion(&output_bytes);
 
@@ -351,13 +359,24 @@ impl ExpandedTest {
             // Write a .expanded.rs file contents with an newline character at the end
             std::fs::write(expanded, &format!("{}\n", output))?;
 
-            return Ok(ExpansionOutcome::New(output_bytes));
+            return Ok(ExpansionOutcome::Update(output_bytes));
         }
 
         let expected_expansion_bytes = std::fs::read(expanded)?;
         let expected_expansion = String::from_utf8_lossy(&expected_expansion_bytes);
 
         let same = output.lines().eq(expected_expansion.lines());
+
+        if !same && project.overwrite {
+            if let ExpansionBehavior::ExpectFiles = expansion_behavior {
+                return Ok(ExpansionOutcome::NoExpandedFileFound);
+            }
+
+            // Write a .expanded.rs file contents with an newline character at the end
+            std::fs::write(expanded, &format!("{}\n", output))?;
+
+            return Ok(ExpansionOutcome::Update(output_bytes));
+        }
 
         Ok(if same {
             ExpansionOutcome::Same

@@ -13,6 +13,7 @@ pub(crate) enum Error {
     GlobPatternError(glob::PatternError),
     ManifestDirError,
     PkgName,
+    UnrecognizedEnv(std::ffi::OsString),
 }
 
 pub(crate) type Result<T> = std::result::Result<T, Error>;
@@ -33,6 +34,11 @@ impl std::fmt::Display for Error {
             GlobPatternError(e) => write!(f, "{}", e),
             ManifestDirError => write!(f, "could not find CARGO_MANIFEST_DIR env var"),
             PkgName => write!(f, "could not find CARGO_PKG_NAME env var"),
+            UnrecognizedEnv(e) => write!(
+                f,
+                "unrecognized value of MACROTEST: \"{}\"",
+                e.to_string_lossy()
+            ),
         }
     }
 }
