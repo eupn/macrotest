@@ -22,7 +22,7 @@ Add to your crate's Cargo.toml:
 
 ```toml
 [dev-dependencies]
-macrotest = "0.1"
+macrotest = "1"
 ```
 
 Under your crate's `tests/` directory, create `tests.rs` file containing the following code:
