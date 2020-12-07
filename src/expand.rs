@@ -198,7 +198,7 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
     let rand_string: String = thread_rng().sample_iter(&Alphanumeric).take(42).collect();
 
     let overwrite = match env::var_os("MACROTEST") {
-        Some(v) if v == "overwrite" => true,
+        Some(ref v) if v == "overwrite" => true,
         Some(v) => return Err(Error::UnrecognizedEnv(v)),
         None => false,
     };
