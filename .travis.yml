@@ -20,9 +20,9 @@ before_script:
 
 script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export TARGET=--target=x86_64-pc-windows-msvc; fi
-  - rustup run $MSRV cargo build $TARGET --verbose --all
-  - rustup run $MSRV cargo test
+  - cargo +$MSRV build $TARGET --verbose --all
+  - cargo +$MSRV test
   - cd test-project
-  - rustup run $MSRV cargo test -- --nocapture
+  - cargo +$MSRV test -- --nocapture
   - cd ../test-procmacro-project
-  - rustup run $MSRV cargo test -- --nocapture
+  - cargo +$MSRV test -- --nocapture
