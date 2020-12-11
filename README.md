@@ -2,11 +2,14 @@
 
 [![Travis-CI](https://api.travis-ci.com/eupn/macrotest.svg?branch=master)](https://travis-ci.com/eupn/macrotest)
 [![Crates.io](https://img.shields.io/crates/v/macrotest)](https://crates.io/crates/macrotest)
+![MSRV 1.34.0](https://img.shields.io/badge/MSRV-1.34.0-orange.svg)
 [![docs.rs](https://docs.rs/macrotest/badge.svg)](https://docs.rs/macrotest/)
 [![Crates.io](https://img.shields.io/crates/d/macrotest)](https://crates.io/crates/macrotest)
 [![Crates.io](https://img.shields.io/crates/l/macrotest)](https://crates.io/crates/macrotest)
 
 Similar to [trybuild], but allows you to test how declarative or procedural macros are expanded.
+
+*Minimal Supported Rust Version: 1.34.0*
 
 ----
 
