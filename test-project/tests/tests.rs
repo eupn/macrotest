@@ -31,5 +31,14 @@ pub fn pass_expect_expanded_args() {
 #[should_panic]
 pub fn fail_expect_expanded_args() {
     // This directory doesn't have expanded files but since they're expected, the test will fail.
-    macrotest::expand_without_refresh_args("tests/no_expanded_args/*.rs", &["--features", "test-feature"]);
+    macrotest::expand_without_refresh_args(
+        "tests/no_expanded_args/*.rs",
+        &["--features", "test-feature"],
+    );
+}
+
+// https://github.com/eupn/macrotest/pull/61
+#[test]
+pub fn pr61() {
+    macrotest::expand("tests/pr61/*/*.rs");
 }
