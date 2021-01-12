@@ -15,7 +15,7 @@ use crate::rustflags;
 use crate::{error::Error, error::Result};
 
 /// An extension for files containing `cargo expand` result.
-const EXPANDED_RS_SUFFIX: &str = ".expanded.rs";
+const EXPANDED_RS_SUFFIX: &str = "expanded.rs";
 
 #[derive(Debug)]
 pub(crate) struct Project {
@@ -128,29 +128,22 @@ where
 
     let mut failures = 0;
     for test in tests {
-        let file_stem = test
-            .test
-            .file_stem()
-            .expect("no file stem")
-            .to_string_lossy()
-            .into_owned();
+        let path = test.test.display();
+        let expanded_path = test.test.with_extension(EXPANDED_RS_SUFFIX);
 
         match test.run(&project, expansion_behavior, &args) {
             Ok(outcome) => match outcome {
-                ExpansionOutcome::Same => println!("{} - ok", file_stem),
+                ExpansionOutcome::Same => {
+                    let _ = writeln!(std::io::stdout(), "{} - ok", path);
+                }
 
                 ExpansionOutcome::Different(a, b) => {
-                    message_different(&file_stem, &a, &b);
+                    message_different(&path.to_string(), &a, &b);
                     failures += 1;
                 }
 
                 ExpansionOutcome::Update(_) => {
-                    let _ = writeln!(
-                        std::io::stderr(),
-                        "{}{} - refreshed",
-                        file_stem,
-                        EXPANDED_RS_SUFFIX
-                    );
+                    let _ = writeln!(std::io::stderr(), "{} - refreshed", expanded_path.display());
                 }
 
                 ExpansionOutcome::ExpandError(msg) => {
@@ -160,8 +153,8 @@ where
                 ExpansionOutcome::NoExpandedFileFound => {
                     let _ = writeln!(
                         std::io::stderr(),
-                        "{}.expanded.rs is expected but not found",
-                        file_stem
+                        "{} is expected but not found",
+                        expanded_path.display()
                     );
                     failures += 1;
                 }
@@ -347,7 +340,7 @@ impl ExpandedTest {
             .into_owned();
         let mut expanded = self.test.clone();
         expanded.pop();
-        let expanded = &expanded.join(format!("{}{}", file_stem, EXPANDED_RS_SUFFIX));
+        let expanded = &expanded.join(format!("{}.{}", file_stem, EXPANDED_RS_SUFFIX));
 
         let output = normalize_expansion(&output_bytes);
 
@@ -407,6 +400,10 @@ fn expand_globs(path: impl AsRef<Path>) -> Vec<ExpandedTest> {
         Ok(paths)
     }
 
+    fn bin_name(i: usize) -> Name {
+        Name(format!("macrotest{:03}", i))
+    }
+
     let mut vec = Vec::new();
 
     let name = path
@@ -426,13 +423,8 @@ fn expand_globs(path: impl AsRef<Path>) -> Vec<ExpandedTest> {
             match glob(utf8) {
                 Ok(paths) => {
                     for path in paths {
-                        let name = path
-                            .file_stem()
-                            .expect("no file stem")
-                            .to_string_lossy()
-                            .to_string();
                         vec.push(ExpandedTest {
-                            name: Name(name),
+                            name: bin_name(vec.len()),
                             test: path,
                             error: None,
                         });
