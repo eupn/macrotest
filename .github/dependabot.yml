@@ -1,0 +1,21 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "21:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: rand
+    versions:
+    - "> 0.7.3, < 1"
+  - dependency-name: rand
+    versions:
+    - ">= 0.8.a, < 0.9"
+- package-ecosystem: cargo
+  directory: "/test-procmacro-project"
+  schedule:
+    interval: daily
+    time: "21:00"
+  open-pull-requests-limit: 10
