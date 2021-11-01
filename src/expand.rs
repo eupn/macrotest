@@ -109,7 +109,7 @@ enum ExpansionBehavior {
     ExpectFiles,
 }
 
-fn run_tests<I, S>(path: impl AsRef<Path>, expansion_behavior: ExpansionBehavior, args: Option<I>)
+fn run_tests<I, S>(path: impl AsRef<Path>, expansion_behavior: ExpansionBehavior, args: Option<I>, expect_fail: bool)
 where
     I: IntoIterator<Item = S> + Clone,
     S: AsRef<OsStr>,
@@ -132,33 +132,40 @@ where
         let expanded_path = test.test.with_extension(EXPANDED_RS_SUFFIX);
 
         match test.run(&project, expansion_behavior, &args) {
-            Ok(outcome) => match outcome {
-                ExpansionOutcome::Same => {
-                    let _ = writeln!(std::io::stdout(), "{} - ok", path);
+            Ok(ExpansionOutcome { error, outcome }) => {
+                if let Some(msg) = error {
+                    if !expect_fail {
+                        message_expansion_error(msg);
+                        failures += 1;
+
+                        continue
+                    }
                 }
 
-                ExpansionOutcome::Different(a, b) => {
-                    message_different(&path.to_string(), &a, &b);
-                    failures += 1;
-                }
+                match outcome {
+                    ExpansionOutcomeKind::Same => {
+                        let _ = writeln!(std::io::stdout(), "{} - ok", path);
+                    }
 
-                ExpansionOutcome::Update(_) => {
-                    let _ = writeln!(std::io::stderr(), "{} - refreshed", expanded_path.display());
-                }
+                    ExpansionOutcomeKind::Different(a, b) => {
+                        message_different(&path.to_string(), &a, &b);
+                        failures += 1;
+                    }
 
-                ExpansionOutcome::ExpandError(msg) => {
-                    message_expansion_error(msg);
-                    failures += 1;
+                    ExpansionOutcomeKind::Update(_) => {
+                        let _ = writeln!(std::io::stderr(), "{} - refreshed", expanded_path.display());
+                    }
+
+                    ExpansionOutcomeKind::NoExpandedFileFound => {
+                        let _ = writeln!(
+                            std::io::stderr(),
+                            "{} is expected but not found",
+                            expanded_path.display()
+                        );
+                        failures += 1;
+                    }
                 }
-                ExpansionOutcome::NoExpandedFileFound => {
-                    let _ = writeln!(
-                        std::io::stderr(),
-                        "{} is expected but not found",
-                        expanded_path.display()
-                    );
-                    failures += 1;
-                }
-            },
+            }
 
             Err(e) => {
                 eprintln!("Error: {:#?}", e);
@@ -301,11 +308,25 @@ fn make_config() -> Config {
 }
 
 #[derive(Debug)]
-enum ExpansionOutcome {
+struct ExpansionOutcome {
+    error: Option<Vec<u8>>,
+    outcome: ExpansionOutcomeKind,
+}
+
+impl ExpansionOutcome {
+    pub fn new(error: Option<Vec<u8>>, outcome: ExpansionOutcomeKind) -> Self {
+        Self {
+            error,
+            outcome
+        }
+    }
+}
+
+#[derive(Debug)]
+enum ExpansionOutcomeKind {
     Same,
     Different(Vec<u8>, Vec<u8>),
     Update(Vec<u8>),
-    ExpandError(Vec<u8>),
     NoExpandedFileFound,
 }
 
@@ -328,9 +349,11 @@ impl ExpandedTest {
     {
         let (success, output_bytes) = cargo::expand(project, &self.name, args)?;
 
-        if !success {
-            return Ok(ExpansionOutcome::ExpandError(output_bytes));
-        }
+        let error = if success {
+            None
+        } else {
+            Some(output_bytes.clone())
+        };
 
         let file_stem = self
             .test
@@ -342,17 +365,21 @@ impl ExpandedTest {
         expanded.pop();
         let expanded = &expanded.join(format!("{}.{}", file_stem, EXPANDED_RS_SUFFIX));
 
-        let output = normalize_expansion(&output_bytes);
+        let output = if success {
+            normalize_expansion(&output_bytes, CARGO_EXPAND_SKIP_LINES_COUNT, &project)
+        } else {
+            normalize_expansion(&output_bytes, CARGO_EXPAND_ERROR_SKIP_LINES_COUNT, &project)
+        };
 
         if !expanded.exists() {
             if let ExpansionBehavior::ExpectFiles = expansion_behavior {
-                return Ok(ExpansionOutcome::NoExpandedFileFound);
+                return Ok(ExpansionOutcome::new(error, ExpansionOutcomeKind::NoExpandedFileFound));
             }
 
             // Write a .expanded.rs file contents with an newline character at the end
             std::fs::write(expanded, &format!("{}\n", output))?;
 
-            return Ok(ExpansionOutcome::Update(output_bytes));
+            return Ok(ExpansionOutcome::new(error, ExpansionOutcomeKind::Update(output_bytes)));
         }
 
         let expected_expansion_bytes = std::fs::read(expanded)?;
@@ -362,31 +389,52 @@ impl ExpandedTest {
 
         if !same && project.overwrite {
             if let ExpansionBehavior::ExpectFiles = expansion_behavior {
-                return Ok(ExpansionOutcome::NoExpandedFileFound);
+                return Ok(ExpansionOutcome::new(error, ExpansionOutcomeKind::NoExpandedFileFound));
             }
 
             // Write a .expanded.rs file contents with an newline character at the end
             std::fs::write(expanded, &format!("{}\n", output))?;
 
-            return Ok(ExpansionOutcome::Update(output_bytes));
+            return Ok(ExpansionOutcome::new(error, ExpansionOutcomeKind::Update(output_bytes)))
         }
 
         Ok(if same {
-            ExpansionOutcome::Same
+            ExpansionOutcome::new(error, ExpansionOutcomeKind::Same)
         } else {
             let output_bytes = output.into_bytes(); // Use normalized text for a message
-            ExpansionOutcome::Different(expected_expansion_bytes, output_bytes)
+            ExpansionOutcome::new(error, ExpansionOutcomeKind::Different(expected_expansion_bytes, output_bytes))
         })
     }
 }
 
 // `cargo expand` does always produce some fixed amount of lines that should be ignored
 const CARGO_EXPAND_SKIP_LINES_COUNT: usize = 5;
+const CARGO_EXPAND_ERROR_SKIP_LINES_COUNT: usize = 1;
 
-fn normalize_expansion(input: &[u8]) -> String {
+/// Removes specified number of lines and removes some unnecessary or non-determenistic cargo output
+fn normalize_expansion(input: &[u8], num_lines_to_skip: usize, project: &Project) -> String {
+    // These prefixes are non-determenistic and project-dependent
+    // These prefixes or the whole line shall be removed
+    let project_path_prefix = format!(" --> {}/", project.source_dir.to_string_lossy());
+    let proj_name_prefix = format!("    Checking {} v0.0.0", project.name);
+
     let code = String::from_utf8_lossy(input);
     code.lines()
-        .skip(CARGO_EXPAND_SKIP_LINES_COUNT)
+        .skip(num_lines_to_skip)
+        .flat_map(|line| {
+            if line.starts_with(&project_path_prefix) {
+                line.strip_prefix(&project_path_prefix)
+            } else {
+                Some(line)
+            }
+        })
+        .flat_map(|line| {
+            if line.starts_with(&proj_name_prefix) {
+                None
+            } else {
+                Some(line)
+            }
+        })
         .collect::<Vec<_>>()
         .join("\n")
 }
