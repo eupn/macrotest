@@ -57,6 +57,26 @@ pub fn expand(path: impl AsRef<Path>) {
         path,
         ExpansionBehavior::RegenerateFiles,
         Option::<Vec<String>>::None,
+        false,
+    );
+}
+
+/// Attempts to expand macros in files that match glob pattern and expects the expansion to fail.
+///
+/// # Refresh behavior
+///
+/// If no matching `.expanded.rs` files present, they will be created and result (error) of expansion
+/// will be written into them.
+///
+/// # Panics
+///
+/// Will panic if matching `.expanded.rs` file is present, but has different expanded code in it.
+pub fn expand_fail(path: impl AsRef<Path>) {
+    run_tests(
+        path,
+        ExpansionBehavior::RegenerateFiles,
+        Option::<Vec<String>>::None,
+        true,
     );
 }
 
@@ -68,7 +88,18 @@ where
     I: IntoIterator<Item = S> + Clone,
     S: AsRef<OsStr>,
 {
-    run_tests(path, ExpansionBehavior::RegenerateFiles, Some(args));
+    run_tests(path, ExpansionBehavior::RegenerateFiles, Some(args), false);
+}
+
+/// Same as [`expand_fail`] but allows to pass additional arguments to `cargo-expand`.
+///
+/// [`expand_fail`]: expand/fn.expand_fail.html
+pub fn expand_args_fail<I, S>(path: impl AsRef<Path>, args: I)
+where
+    I: IntoIterator<Item = S> + Clone,
+    S: AsRef<OsStr>,
+{
+    run_tests(path, ExpansionBehavior::RegenerateFiles, Some(args), true);
 }
 
 /// Attempts to expand macros in files that match glob pattern.
@@ -76,7 +107,7 @@ where
 ///
 /// # Refresh behavior
 ///
-/// If no matching `.expanded.rs` files present, it considered a failed test.
+/// If no matching `.expanded.rs` files present, it's considered a failed test.
 ///
 /// # Panics
 ///
@@ -89,6 +120,29 @@ pub fn expand_without_refresh(path: impl AsRef<Path>) {
         path,
         ExpansionBehavior::ExpectFiles,
         Option::<Vec<String>>::None,
+        false,
+    );
+}
+
+/// Attempts to expand macros in files that match glob pattern and expects a failure.
+/// More strict version of [`expand_fail`] function.
+///
+/// # Refresh behavior
+///
+/// If no matching `.expanded.rs` files present, it's considered a failed test.
+///
+/// # Panics
+///
+/// Will panic if no matching `.expanded.rs` file is present. Otherwise it will exhibit the same
+/// behavior as in [`expand_fail`].
+///
+/// [`expand_fail`]: expand/fn.expand_fail.html
+pub fn expand_without_refresh_fail(path: impl AsRef<Path>) {
+    run_tests(
+        path,
+        ExpansionBehavior::ExpectFiles,
+        Option::<Vec<String>>::None,
+        true,
     );
 }
 
@@ -100,7 +154,18 @@ where
     I: IntoIterator<Item = S> + Clone,
     S: AsRef<OsStr>,
 {
-    run_tests(path, ExpansionBehavior::ExpectFiles, Some(args));
+    run_tests(path, ExpansionBehavior::ExpectFiles, Some(args), false);
+}
+
+/// Same as [`expand_without_refresh_fail`] but allows to pass additional arguments to `cargo-expand` and expects a failure.
+///
+/// [`expand_without_refresh_fail`]: expand/fn.expand_without_refresh_fail.html
+pub fn expand_without_refresh_args_fail<I, S>(path: impl AsRef<Path>, args: I)
+where
+    I: IntoIterator<Item = S> + Clone,
+    S: AsRef<OsStr>,
+{
+    run_tests(path, ExpansionBehavior::ExpectFiles, Some(args), true);
 }
 
 #[derive(Debug, Copy, Clone)]
