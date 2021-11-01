@@ -174,8 +174,12 @@ enum ExpansionBehavior {
     ExpectFiles,
 }
 
-fn run_tests<I, S>(path: impl AsRef<Path>, expansion_behavior: ExpansionBehavior, args: Option<I>, expect_fail: bool)
-where
+fn run_tests<I, S>(
+    path: impl AsRef<Path>,
+    expansion_behavior: ExpansionBehavior,
+    args: Option<I>,
+    expect_fail: bool,
+) where
     I: IntoIterator<Item = S> + Clone,
     S: AsRef<OsStr>,
 {
@@ -203,7 +207,7 @@ where
                         message_expansion_error(msg);
                         failures += 1;
 
-                        continue
+                        continue;
                     }
                 }
 
@@ -218,7 +222,8 @@ where
                     }
 
                     ExpansionOutcomeKind::Update(_) => {
-                        let _ = writeln!(std::io::stderr(), "{} - refreshed", expanded_path.display());
+                        let _ =
+                            writeln!(std::io::stderr(), "{} - refreshed", expanded_path.display());
                     }
 
                     ExpansionOutcomeKind::NoExpandedFileFound => {
@@ -380,10 +385,7 @@ struct ExpansionOutcome {
 
 impl ExpansionOutcome {
     pub fn new(error: Option<Vec<u8>>, outcome: ExpansionOutcomeKind) -> Self {
-        Self {
-            error,
-            outcome
-        }
+        Self { error, outcome }
     }
 }
 
@@ -438,13 +440,19 @@ impl ExpandedTest {
 
         if !expanded.exists() {
             if let ExpansionBehavior::ExpectFiles = expansion_behavior {
-                return Ok(ExpansionOutcome::new(error, ExpansionOutcomeKind::NoExpandedFileFound));
+                return Ok(ExpansionOutcome::new(
+                    error,
+                    ExpansionOutcomeKind::NoExpandedFileFound,
+                ));
             }
 
             // Write a .expanded.rs file contents with an newline character at the end
             std::fs::write(expanded, &format!("{}\n", output))?;
 
-            return Ok(ExpansionOutcome::new(error, ExpansionOutcomeKind::Update(output_bytes)));
+            return Ok(ExpansionOutcome::new(
+                error,
+                ExpansionOutcomeKind::Update(output_bytes),
+            ));
         }
 
         let expected_expansion_bytes = std::fs::read(expanded)?;
@@ -454,20 +462,29 @@ impl ExpandedTest {
 
         if !same && project.overwrite {
             if let ExpansionBehavior::ExpectFiles = expansion_behavior {
-                return Ok(ExpansionOutcome::new(error, ExpansionOutcomeKind::NoExpandedFileFound));
+                return Ok(ExpansionOutcome::new(
+                    error,
+                    ExpansionOutcomeKind::NoExpandedFileFound,
+                ));
             }
 
             // Write a .expanded.rs file contents with an newline character at the end
             std::fs::write(expanded, &format!("{}\n", output))?;
 
-            return Ok(ExpansionOutcome::new(error, ExpansionOutcomeKind::Update(output_bytes)))
+            return Ok(ExpansionOutcome::new(
+                error,
+                ExpansionOutcomeKind::Update(output_bytes),
+            ));
         }
 
         Ok(if same {
             ExpansionOutcome::new(error, ExpansionOutcomeKind::Same)
         } else {
             let output_bytes = output.into_bytes(); // Use normalized text for a message
-            ExpansionOutcome::new(error, ExpansionOutcomeKind::Different(expected_expansion_bytes, output_bytes))
+            ExpansionOutcome::new(
+                error,
+                ExpansionOutcomeKind::Different(expected_expansion_bytes, output_bytes),
+            )
         })
     }
 }
