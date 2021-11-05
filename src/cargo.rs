@@ -65,11 +65,22 @@ where
         .output()
         .map_err(|e| Error::CargoExpandExecutionError(e.to_string()))?;
 
+    let has_errors = {
+        let msg = b"error: ";
+        cargo_expand.stderr.windows(msg.len()).any(|w| w == msg)
+    };
+
+    // Handle compilation errors
     if !cargo_expand.status.success() {
-        return Ok((false, cargo_expand.stderr));
+        return Ok((false, cargo_expand.stdout));
     }
 
-    Ok((true, cargo_expand.stdout))
+    // Handle macro expansion errors
+    if !cargo_expand.stdout.is_empty() && has_errors {
+        return Ok((false, cargo_expand.stderr))
+    }
+
+    Ok((cargo_expand.status.success(), cargo_expand.stdout))
 }
 
 /// Builds dependencies for macro expansion and pipes `cargo` output to `STDOUT`.
