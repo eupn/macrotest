@@ -447,7 +447,7 @@ impl ExpandedTest {
             }
 
             // Write a .expanded.rs file contents with an newline character at the end
-            std::fs::write(expanded, &format!("{}\n", output))?;
+            std::fs::write(expanded, &format!("{}", output))?;
 
             return Ok(ExpansionOutcome::new(
                 error,
@@ -469,7 +469,7 @@ impl ExpandedTest {
             }
 
             // Write a .expanded.rs file contents with an newline character at the end
-            std::fs::write(expanded, &format!("{}\n", output))?;
+            std::fs::write(expanded, &format!("{}", output))?;
 
             return Ok(ExpansionOutcome::new(
                 error,
@@ -495,30 +495,32 @@ const CARGO_EXPAND_ERROR_SKIP_LINES_COUNT: usize = 1;
 
 /// Removes specified number of lines and removes some unnecessary or non-determenistic cargo output
 fn normalize_expansion(input: &[u8], num_lines_to_skip: usize, project: &Project) -> String {
-    // These prefixes are non-determenistic and project-dependent
+    // These prefixes are non-deterministic and project-dependent
     // These prefixes or the whole line shall be removed
     let project_path_prefix = format!(" --> {}/", project.source_dir.to_string_lossy());
     let proj_name_prefix = format!("    Checking {} v0.0.0", project.name);
+    let blocking_prefix = "    Blocking waiting for file lock on package cache";
 
     let code = String::from_utf8_lossy(input);
-    code.lines()
+    let lines = code.lines()
         .skip(num_lines_to_skip)
-        .flat_map(|line| {
-            if line.starts_with(&project_path_prefix) {
-                line.strip_prefix(&project_path_prefix)
-            } else {
-                Some(line)
-            }
+        .filter(|line| {
+            !line.starts_with(&proj_name_prefix)
         })
-        .flat_map(|line| {
-            if line.starts_with(&proj_name_prefix) {
-                None
-            } else {
-                Some(line)
-            }
+        .map(|line| {
+            line.strip_prefix(&project_path_prefix).unwrap_or(line)
+        })
+        .map(|line| {
+            line.strip_prefix(&blocking_prefix).unwrap_or(line)
         })
         .collect::<Vec<_>>()
-        .join("\n")
+        .join("\n");
+
+    if !lines.ends_with("\n\n") {
+        return format!("{}\n", lines)
+    } else {
+        lines
+    }
 }
 
 fn expand_globs(path: impl AsRef<Path>) -> Vec<ExpandedTest> {
