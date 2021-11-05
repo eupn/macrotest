@@ -70,13 +70,8 @@ where
         cargo_expand.stderr.windows(msg.len()).any(|w| w == msg)
     };
 
-    // Handle compilation errors
-    if !cargo_expand.status.success() {
-        return Ok((false, cargo_expand.stdout));
-    }
-
-    // Handle macro expansion errors
-    if !cargo_expand.stdout.is_empty() && has_errors {
+    // Handle compilation or macro expansion errors
+    if !cargo_expand.status.success() || (!cargo_expand.stdout.is_empty() && has_errors) {
         return Ok((false, cargo_expand.stderr))
     }
 
