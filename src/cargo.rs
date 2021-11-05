@@ -72,7 +72,7 @@ where
 
     // Handle compilation or macro expansion errors
     if !cargo_expand.status.success() || (!cargo_expand.stdout.is_empty() && has_errors) {
-        return Ok((false, cargo_expand.stderr))
+        return Ok((false, cargo_expand.stderr));
     }
 
     Ok((cargo_expand.status.success(), cargo_expand.stdout))

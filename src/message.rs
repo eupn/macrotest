@@ -2,8 +2,8 @@ use diff::Result;
 
 /// Prints the difference of the two snippets of expanded code.
 pub(crate) fn message_different(name: &str, a: &[u8], b: &[u8]) {
-    let a = String::from_utf8_lossy(&a);
-    let b = String::from_utf8_lossy(&b);
+    let a = String::from_utf8_lossy(a);
+    let b = String::from_utf8_lossy(b);
 
     let changes = diff::lines(&a, &b);
 

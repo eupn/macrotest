@@ -433,9 +433,9 @@ impl ExpandedTest {
         let expanded = &expanded.join(format!("{}.{}", file_stem, EXPANDED_RS_SUFFIX));
 
         let output = if success {
-            normalize_expansion(&output_bytes, CARGO_EXPAND_SKIP_LINES_COUNT, &project)
+            normalize_expansion(&output_bytes, CARGO_EXPAND_SKIP_LINES_COUNT, project)
         } else {
-            normalize_expansion(&output_bytes, CARGO_EXPAND_ERROR_SKIP_LINES_COUNT, &project)
+            normalize_expansion(&output_bytes, CARGO_EXPAND_ERROR_SKIP_LINES_COUNT, project)
         };
 
         if !expanded.exists() {
@@ -447,7 +447,7 @@ impl ExpandedTest {
             }
 
             // Write a .expanded.rs file contents with an newline character at the end
-            std::fs::write(expanded, &format!("{}", output))?;
+            std::fs::write(expanded, output)?;
 
             return Ok(ExpansionOutcome::new(
                 error,
@@ -469,7 +469,7 @@ impl ExpandedTest {
             }
 
             // Write a .expanded.rs file contents with an newline character at the end
-            std::fs::write(expanded, &format!("{}", output))?;
+            std::fs::write(expanded, output)?;
 
             return Ok(ExpansionOutcome::new(
                 error,
@@ -502,22 +502,17 @@ fn normalize_expansion(input: &[u8], num_lines_to_skip: usize, project: &Project
     let blocking_prefix = "    Blocking waiting for file lock on package cache";
 
     let code = String::from_utf8_lossy(input);
-    let lines = code.lines()
+    let lines = code
+        .lines()
         .skip(num_lines_to_skip)
-        .filter(|line| {
-            !line.starts_with(&proj_name_prefix)
-        })
-        .map(|line| {
-            line.strip_prefix(&project_path_prefix).unwrap_or(line)
-        })
-        .map(|line| {
-            line.strip_prefix(&blocking_prefix).unwrap_or(line)
-        })
+        .filter(|line| !line.starts_with(&proj_name_prefix))
+        .map(|line| line.strip_prefix(&project_path_prefix).unwrap_or(line))
+        .map(|line| line.strip_prefix(&blocking_prefix).unwrap_or(line))
         .collect::<Vec<_>>()
         .join("\n");
 
     if !lines.ends_with("\n\n") {
-        return format!("{}\n", lines)
+        return format!("{}\n", lines);
     } else {
         lines
     }
