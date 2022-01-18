@@ -48,3 +48,18 @@ pub fn my_attribute(_args: TokenStream, input: TokenStream) -> TokenStream {
 
     tokens.into()
 }
+
+#[proc_macro]
+pub fn my_macro_panics(_input: TokenStream) -> TokenStream {
+    panic!("test")
+}
+
+#[proc_macro_derive(MyDerivePanics)]
+pub fn my_derive_panics(_input: TokenStream) -> TokenStream {
+    panic!("test")
+}
+
+#[proc_macro_attribute]
+pub fn my_attribute_panics(_args: TokenStream, _input: TokenStream) -> TokenStream {
+    panic!("test")
+}

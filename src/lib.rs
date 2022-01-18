@@ -140,5 +140,9 @@ mod rustflags;
 
 pub use expand::expand;
 pub use expand::expand_args;
+pub use expand::expand_args_fail;
+pub use expand::expand_fail;
 pub use expand::expand_without_refresh;
 pub use expand::expand_without_refresh_args;
+pub use expand::expand_without_refresh_args_fail;
+pub use expand::expand_without_refresh_fail;
