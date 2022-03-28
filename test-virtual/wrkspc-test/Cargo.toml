@@ -1,7 +1,8 @@
 [package]
 name = "wrkspc-test"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
+publish = false
 
 [lib]
 
@@ -10,13 +11,11 @@ default = []
 
 test-feature = []
 
-[dependencies]
+[dev-dependencies]
+macrotest = { path = "../../../macrotest" }
 inventory = "0.2.2"
 
-[dev-dependencies]
-macrotest = { path = "../../" }
-
 [[test]]
-name = "workspace-tests"
-path = "src/main.rs"
+name = "integration-tests"
+path = "integration/main.rs"
 harness = false
