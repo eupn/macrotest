@@ -10,9 +10,11 @@ default = []
 
 test-feature = []
 
+[dependencies]
+inventory = "0.2.2"
+
 [dev-dependencies]
 macrotest = { path = "../../" }
-inventory = "0.2.2"
 
 [[test]]
 name = "workspace-tests"
