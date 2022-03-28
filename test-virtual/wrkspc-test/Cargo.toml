@@ -12,3 +12,9 @@ test-feature = []
 
 [dev-dependencies]
 macrotest = { path = "../../" }
+inventory = "0.2.2"
+
+[[test]]
+name = "workspace-tests"
+path = "src/main.rs"
+harness = false
