@@ -1,3 +1,5 @@
+pub mod basic;
+
 #[derive(Debug)]
 pub struct IntegrationTest {
     pub name: &'static str,
