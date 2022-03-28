@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "wrkspc-dev",
+    "wrkspc-macro",
+    "wrkspc-test",
+    "wrkspc",
+]
