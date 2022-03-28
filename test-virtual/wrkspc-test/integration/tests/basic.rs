@@ -1,10 +1,10 @@
-use super::IntegrationTest;
+use crate::tests::IntegrationTest;
 
 fn basic_test() {
-   println!("Running basic test")
+    println!("Running basic test")
 }
 
 inventory::submit!(IntegrationTest {
-   name: "basic",
-   test_fn: basic_test
+    name: "basic",
+    test_fn: basic_test
 });

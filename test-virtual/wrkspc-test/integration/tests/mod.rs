@@ -1,4 +1,5 @@
 pub mod basic;
+pub mod feature;
 
 #[derive(Debug)]
 pub struct IntegrationTest {

@@ -19,3 +19,9 @@ inventory = "0.2.2"
 name = "integration-tests"
 path = "integration/main.rs"
 harness = false
+
+[[test]]
+name = "defaults-indev-tokio"
+path = "integration/feature.rs"
+harness = false
+required-features = ["test-feature"]
