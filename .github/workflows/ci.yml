@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Rust ${{matrix.rust}} on ${{matrix.os}}
+    runs-on: ${{matrix.os}}-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [nightly, beta, stable]
+        os: [ubuntu, macos, windows]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{matrix.rust}}
+          profile: minimal
+          override: true
+
+      # A nightly toolchain is required for cargo-expand to work, even if the
+      # toolchain with which tests are run is not nightly.
+      - run: rustup toolchain install nightly
+        if: matrix.rust != 'nightly'
+
+      - run: cargo install cargo-expand
+
+      - run: cargo test --manifest-path test-project/Cargo.toml -- --nocapture
+
+      - run: cargo test --manifest-path test-procmacro-project/Cargo.toml -- --nocapture

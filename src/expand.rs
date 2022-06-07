@@ -357,8 +357,8 @@ impl ExpandedTest {
                 return Ok(ExpansionOutcome::NoExpandedFileFound);
             }
 
-            // Write a .expanded.rs file contents with an newline character at the end
-            std::fs::write(expanded, &format!("{}\n", output))?;
+            // Write a .expanded.rs file contents
+            std::fs::write(expanded, output)?;
 
             return Ok(ExpansionOutcome::Update(output_bytes));
         }
@@ -373,8 +373,8 @@ impl ExpandedTest {
                 return Ok(ExpansionOutcome::NoExpandedFileFound);
             }
 
-            // Write a .expanded.rs file contents with an newline character at the end
-            std::fs::write(expanded, &format!("{}\n", output))?;
+            // Write a .expanded.rs file contents
+            std::fs::write(expanded, output)?;
 
             return Ok(ExpansionOutcome::Update(output_bytes));
         }
