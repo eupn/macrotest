@@ -10,4 +10,3 @@ pub fn main() {
         temp_vec
     };
 }
-
