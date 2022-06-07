@@ -108,7 +108,7 @@ pub(crate) fn build_dependencies(project: &Project) -> Result<()> {
 const IGNORED_LINES: [&str; 5] = [
     "#![feature(prelude_import)]",
     "#[prelude_import]",
-    "use std::prelude::v1::*;",
+    "use std::prelude::",
     "#[macro_use]",
     "extern crate std;",
 ];
