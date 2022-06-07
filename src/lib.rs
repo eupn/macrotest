@@ -76,11 +76,6 @@
 //!
 //! A **nightly** compiler is required for this tool to work, so it must be installed as well.
 //!
-//! `cargo-expand` uses [`rustfmt`](https://github.com/rust-lang/rustfmt) to format expanded code.
-//! It's highly recommended to install it since the examples in the `test-project/` and
-//! `test-procmacro-project/` folders are using a formatted version of the expanded code
-//! to compare with.
-//!
 //! ## Setting up a test project
 //!
 //! In your crate that provides procedural or declarative macros, under the `tests` directory,
