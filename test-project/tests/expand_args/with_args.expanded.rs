@@ -1,4 +1,4 @@
-extern crate std;
+#![cfg(feature = "test-feature")]
 #[macro_use]
 extern crate test_project;
 pub fn main() {
@@ -10,3 +10,4 @@ pub fn main() {
         temp_vec
     };
 }
+

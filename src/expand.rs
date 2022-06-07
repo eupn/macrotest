@@ -12,6 +12,7 @@ use crate::manifest::{Bin, Build, Config, Manifest, Name, Package, Workspace};
 use crate::message::{message_different, message_expansion_error};
 use crate::rustflags;
 use crate::{error::Error, error::Result};
+use syn::{Item, Meta, NestedMeta};
 
 /// An extension for files containing `cargo expand` result.
 const EXPANDED_RS_SUFFIX: &str = "expanded.rs";
@@ -387,15 +388,55 @@ impl ExpandedTest {
     }
 }
 
-// `cargo expand` does always produce some fixed amount of lines that should be ignored
-const CARGO_EXPAND_SKIP_LINES_COUNT: usize = 5;
-
 fn normalize_expansion(input: &[u8]) -> String {
     let code = String::from_utf8_lossy(input);
-    code.lines()
-        .skip(CARGO_EXPAND_SKIP_LINES_COUNT)
-        .collect::<Vec<_>>()
-        .join("\n")
+    let mut syntax_tree = match syn::parse_file(&code) {
+        Ok(syntax_tree) => syntax_tree,
+        Err(_) => return code.into_owned(),
+    };
+
+    // Strip the following:
+    //
+    //     #![feature(prelude_import)]
+    //
+    syntax_tree.attrs.retain(|attr| {
+        if let Ok(Meta::List(meta)) = attr.parse_meta() {
+            if meta.path.is_ident("feature") && meta.nested.len() == 1 {
+                if let NestedMeta::Meta(Meta::Path(inner)) = &meta.nested[0] {
+                    if inner.is_ident("prelude_import") {
+                        return false;
+                    }
+                }
+            }
+        }
+        true
+    });
+
+    // Strip the following:
+    //
+    //     #[prelude_import]
+    //     use std::prelude::$edition::*;
+    //
+    //     #[macro_use]
+    //     extern crate std;
+    //
+    syntax_tree.items.retain(|item| {
+        if let Item::Use(item) = item {
+            if let Some(attr) = item.attrs.first() {
+                if attr.path.is_ident("prelude_import") && attr.tokens.is_empty() {
+                    return false;
+                }
+            }
+        }
+        if let Item::ExternCrate(item) = item {
+            if item.ident == "std" {
+                return false;
+            }
+        }
+        true
+    });
+
+    prettyplease::unparse(&syntax_tree)
 }
 
 fn expand_globs(path: impl AsRef<Path>) -> Vec<ExpandedTest> {

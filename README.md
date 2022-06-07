@@ -19,7 +19,7 @@ Please refer to the [documentation](https://docs.rs/macrotest).
 
 ## Example
 
-Install nightly rust, [`cargo expand`] and [`rustfmt`].
+Install nightly rust and [`cargo expand`].
 
 Add to your crate's Cargo.toml:
 
@@ -43,5 +43,3 @@ See [test-project](test-project) and [test-procmacro-project](test-procmacro-pro
 
 [trybuild]: https://github.com/dtolnay/trybuild
 [`cargo expand`]: https://github.com/dtolnay/cargo-expand
-[`rustfmt`]: https://github.com/rust-lang/rustfmt
-
