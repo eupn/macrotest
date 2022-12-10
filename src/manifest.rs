@@ -34,6 +34,8 @@ pub enum Edition {
     E2015,
     #[serde(rename = "2018")]
     E2018,
+    #[serde(rename = "2021")]
+    E2021
 }
 
 #[derive(Serialize, Debug)]
@@ -60,7 +62,7 @@ pub struct Workspace {}
 
 impl Default for Edition {
     fn default() -> Self {
-        Edition::E2018
+        Edition::E2021
     }
 }
 
