@@ -28,13 +28,9 @@ pub struct Package {
     pub publish: bool,
 }
 
+// Do not use enum for edition for future-compatibility.
 #[derive(Serialize, Deserialize, Debug)]
-pub enum Edition {
-    #[serde(rename = "2015")]
-    E2015,
-    #[serde(rename = "2018")]
-    E2018,
-}
+pub struct Edition(pub String);
 
 #[derive(Serialize, Debug)]
 pub struct Bin {
@@ -60,7 +56,7 @@ pub struct Workspace {}
 
 impl Default for Edition {
     fn default() -> Self {
-        Edition::E2018
+        Self("2021".into())
     }
 }
 
