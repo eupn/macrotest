@@ -3,6 +3,15 @@
 version = 3
 
 [[package]]
+name = "basic-toml"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7bfc506e7a2370ec239e1d072507b2a80c833083699d3c6fa176fbb4de8448c6"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "diff"
 version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -24,13 +33,13 @@ checksum = "af150ab688ff2122fcef229be89cb50dd66af9e01a4ff320cc137eecc9bacc38"
 name = "macrotest"
 version = "1.0.9"
 dependencies = [
+ "basic-toml",
  "diff",
  "glob",
  "prettyplease",
  "serde",
  "serde_json",
  "syn",
- "toml",
 ]
 
 [[package]]
@@ -114,15 +123,6 @@ name = "test-project"
 version = "0.1.0"
 dependencies = [
  "macrotest",
-]
-
-[[package]]
-name = "toml"
-version = "0.5.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4f7f0dd8d50a853a531c426359045b1998f04219d88799810762cd4ad314234"
-dependencies = [
- "serde",
 ]
 
 [[package]]
