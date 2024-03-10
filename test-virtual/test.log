@@ -1,330 +1,60 @@
-   Compiling wrkspc-test v0.0.0 (/home/hedge/src/macrotest/test-workspace/wrkspc-test)
-    Finished test [unoptimized + debuginfo] target(s) in 0.77s
-     Running unittests (target/debug/deps/wrkspc-1f5332e22b172417)
+   Compiling wrkspc-test v0.0.0 (/home/hedge/src/macrotest/test-virtual/wrkspc-test)
+    Finished test [unoptimized + debuginfo] target(s) in 1.88s
+     Running unittests (target/debug/deps/wrkspc-c42e7841a2166c46)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/lib.rs (target/debug/deps/lib-d14d9e487073e3b0)
+     Running tests/lib.rs (target/debug/deps/lib-6b376d4406ebc397)
 
-running 1 test
-test wrkspc_test ... ok
+running 0 tests
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
 
-     Running unittests (target/debug/deps/wrkspc_dev-dcbcfc1f695a413e)
+     Running unittests (target/debug/deps/wrkspc_dev-8016f768612e755a)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/lib.rs (target/debug/deps/lib-0e97916292bfa7d3)
+     Running tests/lib.rs (target/debug/deps/lib-8059e559b0ae9056)
 
-running 1 test
-test wrkspc_test ... ok
+running 0 tests
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
 
-     Running unittests (target/debug/deps/wrkspc_macro-70169514944d2a9b)
+     Running unittests (target/debug/deps/wrkspc_macro-5238f20639a08243)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/tests.rs (target/debug/deps/tests-5608a6cdf865edb7)
+     Running tests/tests.rs (target/debug/deps/tests-d4e63bc64c0942af)
 
-running 1 test
-test pass ... Running 3 macro expansion tests
-    Updating crates.io index
-    Checking wrkspc-macro-tests v0.0.0 (/home/hedge/src/macrotest/test-workspace/target/tests/wrkspc-macro/macrotest000)
-    Finished dev [unoptimized + debuginfo] target(s) in 1.88s
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running unittests (target/debug/deps/wrkspc_test-86138e2ad1f9ee9c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running integration/main.rs (target/debug/deps/integration_tests-3f75cfd9c75954c7)
+Setup
+Running 1 macro expansion tests
+    Checking wrkspc-test-tests v0.0.0 (/home/hedge/src/macrotest/test-virtual/target/tests/wrkspc-test/macrotest000)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.21s
 
 use std::prelude::rust_2018::*;
-tests/expand/attribute.rs - ok
-tests/expand/derive.rs - ok
-tests/expand/macro.rs - ok
-ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.34s
-
-     Running unittests (target/debug/deps/wrkspc_test-b4113ecf2fdb355b)
-
-running 0 tests
-
-test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-     Running tests/par_tests_regression.rs (target/debug/deps/par_tests_regression-6dac28f068c6540e)
-
-running 0 tests
-
-test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-     Running tests/tests.rs (target/debug/deps/tests-c5731019421a7315)
-
-running 7 tests
-test fail_expect_expanded - should panic ... Running 4 macro expansion tests
-    Checking wrkspc-test-tests v0.0.0 (/home/hedge/src/macrotest/test-workspace/target/tests/wrkspc-test/macrotest000)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.31s
-
-use std::prelude::rust_2018::*;
-tests/no_expanded/first.expanded.rs is expected but not found
-tests/no_expanded/fourth.expanded.rs is expected but not found
-tests/no_expanded/second.expanded.rs is expected but not found
-tests/no_expanded/third.expanded.rs is expected but not found
+Expansion error:
+error: Package `wrkspc-test-tests v0.0.0 (/home/hedge/src/macrotest/test-virtual/target/tests/wrkspc-test/macrotest000)` does not have the feature `test-feature`
 
 
 
-thread 'main' panicked at '4 of 4 tests failed', /home/hedge/src/macrotest/src/expand.rs:171:9
+
+thread 'main' panicked at '1 of 1 tests failed', /home/hedge/src/macrotest/src/expand.rs:171:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-ok
-test fail_expect_expanded_args - should panic ... Running 1 macro expansion tests
-    Checking wrkspc-test-tests v0.0.0 (/home/hedge/src/macrotest/test-workspace/target/tests/wrkspc-test/macrotest001)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.29s
-
-use std::prelude::rust_2018::*;
-tests/no_expanded_args/with_args.expanded.rs is expected but not found
-
-
-
-thread 'main' panicked at '1 of 1 tests failed', /home/hedge/src/macrotest/src/expand.rs:171:9
-ok
-test pass ... Running 4 macro expansion tests
-    Checking wrkspc-test-tests v0.0.0 (/home/hedge/src/macrotest/test-workspace/target/tests/wrkspc-test/macrotest002)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.40s
-
-use std::prelude::rust_2018::*;
-tests/expand/first.rs - different!
-Diff [lines: 2 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    Vec::new();
--    ();
- }
-+
---------------------------
-tests/expand/fourth.rs - different!
-Diff [lines: 8 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    {
-+        let mut temp_vec = Vec::new();
-+        temp_vec.push(1);
-+        temp_vec.push(2);
-+        temp_vec.push(3);
-+        temp_vec
-+    };
--    ();
- }
-+
---------------------------
-tests/expand/second.rs - different!
-Diff [lines: 6 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    {
-+        let mut temp_vec = Vec::new();
-+        temp_vec.push(1);
-+        temp_vec
-+    };
--    ();
- }
-+
---------------------------
-tests/expand/third.rs - different!
-Diff [lines: 7 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    {
-+        let mut temp_vec = Vec::new();
-+        temp_vec.push(1);
-+        temp_vec.push(2);
-+        temp_vec
-+    };
--    ();
- }
-+
---------------------------
-
-
-
-thread 'main' panicked at '4 of 4 tests failed', /home/hedge/src/macrotest/src/expand.rs:171:9
-FAILED
-test pass_args ... Running 1 macro expansion tests
-    Checking wrkspc-test-tests v0.0.0 (/home/hedge/src/macrotest/test-workspace/target/tests/wrkspc-test/macrotest003)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.42s
-
-use std::prelude::rust_2018::*;
-tests/expand_args/with_args.rs - different!
-Diff [lines: 8 added, 1 removed]:
---------------------------
- extern crate std;
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    {
-+        let mut temp_vec = Vec::new();
-+        temp_vec.push(1);
-+        temp_vec.push(2);
-+        temp_vec.push(3);
-+        temp_vec
-+    };
--    ();
- }
-+
---------------------------
-
-
-
-thread 'main' panicked at '1 of 1 tests failed', /home/hedge/src/macrotest/src/expand.rs:171:9
-FAILED
-test pass_expect_expanded ... Running 4 macro expansion tests
-    Checking wrkspc-test-tests v0.0.0 (/home/hedge/src/macrotest/test-workspace/target/tests/wrkspc-test/macrotest004)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.86s
-
-use std::prelude::rust_2018::*;
-tests/expand/first.rs - different!
-Diff [lines: 2 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    Vec::new();
--    ();
- }
-+
---------------------------
-tests/expand/fourth.rs - different!
-Diff [lines: 8 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    {
-+        let mut temp_vec = Vec::new();
-+        temp_vec.push(1);
-+        temp_vec.push(2);
-+        temp_vec.push(3);
-+        temp_vec
-+    };
--    ();
- }
-+
---------------------------
-tests/expand/second.rs - different!
-Diff [lines: 6 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    {
-+        let mut temp_vec = Vec::new();
-+        temp_vec.push(1);
-+        temp_vec
-+    };
--    ();
- }
-+
---------------------------
-tests/expand/third.rs - different!
-Diff [lines: 7 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    {
-+        let mut temp_vec = Vec::new();
-+        temp_vec.push(1);
-+        temp_vec.push(2);
-+        temp_vec
-+    };
--    ();
- }
-+
---------------------------
-
-
-
-thread 'main' panicked at '4 of 4 tests failed', /home/hedge/src/macrotest/src/expand.rs:171:9
-FAILED
-test pass_expect_expanded_args ... Running 1 macro expansion tests
-    Checking wrkspc-test-tests v0.0.0 (/home/hedge/src/macrotest/test-workspace/target/tests/wrkspc-test/macrotest005)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.55s
-
-use std::prelude::rust_2018::*;
-tests/expand_args/with_args.rs - different!
-Diff [lines: 8 added, 1 removed]:
---------------------------
- extern crate std;
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    {
-+        let mut temp_vec = Vec::new();
-+        temp_vec.push(1);
-+        temp_vec.push(2);
-+        temp_vec.push(3);
-+        temp_vec
-+    };
--    ();
- }
-+
---------------------------
-
-
-
-thread 'main' panicked at '1 of 1 tests failed', /home/hedge/src/macrotest/src/expand.rs:171:9
-FAILED
-test pr61 ... Running 2 macro expansion tests
-    Checking wrkspc-test-tests v0.0.0 (/home/hedge/src/macrotest/test-workspace/target/tests/wrkspc-test/macrotest006)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.41s
-
-use std::prelude::rust_2018::*;
-tests/pr61/a/test.rs - different!
-Diff [lines: 2 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    Vec::new();
--    ();
- }
-+
---------------------------
-tests/pr61/b/test.rs - different!
-Diff [lines: 2 added, 1 removed]:
---------------------------
- #[macro_use]
- extern crate test_project;
- pub fn main() {
-+    Vec::new();
--    ();
- }
-+
---------------------------
-
-
-
-thread 'main' panicked at '2 of 2 tests failed', /home/hedge/src/macrotest/src/expand.rs:171:9
-FAILED
-
-failures:
-
-failures:
-    pass
-    pass_args
-    pass_expect_expanded
-    pass_expect_expanded_args
-    pr61
-
-test result: FAILED. 2 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 26.09s
-
-error: test failed, to rerun pass '-p wrkspc-test --test tests'
+error: test failed, to rerun pass '-p wrkspc-test --test integration-tests'
