@@ -1,6 +1,7 @@
-pub mod tests;
+#[macro_use]
+extern crate wrkspc_macro;
 
-use tests::IntegrationTest;
+pub use crate::prelude::*;
 
 fn setup() {
     println!("Setup")

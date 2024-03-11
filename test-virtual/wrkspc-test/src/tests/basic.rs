@@ -1,4 +1,4 @@
-use crate::tests::IntegrationTest;
+use crate::IntegrationTest;
 
 fn basic_test() {
     println!("Running basic test")

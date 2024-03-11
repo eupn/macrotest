@@ -1,3 +1,8 @@
+pub mod tests;
+pub mod prelude;
+
+pub use prelude::*;
+
 #[macro_export]
 macro_rules! test_vec {
     () => {
@@ -14,8 +19,7 @@ macro_rules! test_vec {
     };
 }
 
-#[cfg(feature = "test-feature")]
-#[cfg_attr(feature = "test-feature", macro_export)]
+#[macro_export]
 macro_rules! test_feature_vec {
     () => {
         Vec::new()

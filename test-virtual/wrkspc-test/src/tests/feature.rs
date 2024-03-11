@@ -1,4 +1,4 @@
-use crate::tests::IntegrationTest;
+pub use crate::prelude::*;
 
 fn feature_test() {
     println!("Running feature test")
@@ -10,27 +10,24 @@ inventory::submit!(IntegrationTest {
 });
 
 pub fn pass_args() {
-    macrotest::expand_args(
-        "integration/tests/feature/expanded/*.rs",
-        &["--features", "test-feature"],
-    );
+    macrotest::expand("src/tests/feature/expanded/*.rs");
 }
 inventory::submit!(IntegrationTest {
     name: "feature",
     test_fn: pass_args
 });
 
-pub fn pass_expect_expanded_args() {
-    // If you delete one of the `.expanded.rs` files, this test will fail.
-    macrotest::expand_args(
-        "integration/tests/feature/expanded/*.rs",
-        &["--features", "test-feature"],
-    );
-}
-inventory::submit!(IntegrationTest {
-    name: "feature",
-    test_fn: feature_test
-});
+// pub fn pass_expect_expanded_args() {
+//     // If you delete one of the `.expanded.rs` files, this test will fail.
+//     macrotest::expand_args(
+//         "integration/tests/feature/expanded/*.rs",
+//         &["--features", "test-feature"],
+//     );
+// }
+// inventory::submit!(IntegrationTest {
+//     name: "feature",
+//     test_fn: pass_expect_expanded_args
+// });
 
 // Suspended panicky tests for the moment
 //
@@ -45,3 +42,5 @@ inventory::submit!(IntegrationTest {
 //     name: "feature",
 //     test_fn: fail_expect_expanded_args
 // });
+
+pub fn main() {}

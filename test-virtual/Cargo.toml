@@ -1,7 +1,49 @@
 [workspace]
+resolver = "2"
 members = [
     "wrkspc-dev",
     "wrkspc-macro",
     "wrkspc-test",
-    "wrkspc",
 ]
+
+[workspace.package]
+version = "0.0.0"
+authors = ["eupn <eupn@protonmail.com>", "Mark Van de Vyver <mark@taqtiqa.com>"]
+license = "Apache-2.0"
+edition = "2021"
+rust-version = "1.56"
+description = "A virtual workspace example for macrotest"
+homepage = "https://github.com/eupn/macrotest"
+repository = "https://github.com/eupn/macrotest"
+documentation = "https://docs.rs/macrotest"
+readme = "README.md"
+publish = false
+
+[workspace.dependencies]
+wrkspc-dev = { path = "wrkspc-dev" }
+wrkspc-macro = { path = "wrkspc-macro" }
+wrkspc-test = { path = "wrkspc-test" }
+
+macrotest = { path = "../" }
+
+inventory = "0.3"
+proc-macro2 = "1.0"
+quote = "1"
+syn = "2.0"
+
+[package]
+name = "wrkspc"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+readme.workspace = true
+publish = false
+
+[dependencies]
+wrkspc-macro.workspace = true

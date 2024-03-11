@@ -8,5 +8,6 @@ pub fn main() {
         temp_vec.push(2);
         temp_vec.push(3);
         temp_vec
+        // error
     };
 }

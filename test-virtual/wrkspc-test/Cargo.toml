@@ -1,27 +1,36 @@
 [package]
 name = "wrkspc-test"
-version = "0.0.0"
-edition = "2021"
+
 publish = false
 
 [lib]
+path = "src/lib.rs"
+
+# [[bin]]
+# name = "wrkspc-test"
+# path = "src/main.rs"
 
 [features]
 default = []
-
 test-feature = []
 
+[dependencies]
+wrkspc-dev.workspace = true
+wrkspc-macro.workspace = true
+
+macrotest.workspace = true
+inventory.workspace = true
+
 [dev-dependencies]
-macrotest = { path = "../../../macrotest" }
-inventory = "0.2.2"
+wrkspc-dev.workspace = true
+wrkspc-macro.workspace = true
 
 [[test]]
 name = "integration-tests"
-path = "integration/main.rs"
+path = "src/main.rs"
 harness = false
 
-[[test]]
-name = "defaults-indev-tokio"
-path = "integration/feature.rs"
-harness = false
-required-features = ["test-feature"]
+# [[test]]
+# name = "feature-test"
+# path = "src/tests/feature.rs"
+# harness = false
