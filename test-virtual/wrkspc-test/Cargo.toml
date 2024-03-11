@@ -24,11 +24,13 @@ inventory.workspace = true
 [dev-dependencies]
 wrkspc-dev.workspace = true
 wrkspc-macro.workspace = true
+macrotest.workspace = true
+inventory.workspace = true
 
-[[test]]
-name = "integration-tests"
-path = "src/main.rs"
-harness = false
+# [[test]]
+# name = "integration-tests"
+# path = "src/main.rs"
+# harness = false
 
 # [[test]]
 # name = "feature-test"

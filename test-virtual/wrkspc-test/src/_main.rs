@@ -1,5 +1,3 @@
-#[macro_use]
-extern crate wrkspc_macro;
 
 pub use crate::prelude::*;
 
