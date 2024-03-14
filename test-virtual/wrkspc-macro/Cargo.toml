@@ -20,6 +20,9 @@ proc-macro2.workspace = true
 quote.workspace = true
 syn.workspace = true
 
+# wrkspc-test dependencies become dev-dependencies
 [dev-dependencies]
+wrkspc-dev.workspace = true
 # wrkspc-test.workspace = true
+
 macrotest.workspace = true

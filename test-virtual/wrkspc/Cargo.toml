@@ -14,13 +14,13 @@ publish = false
 
 
 [dependencies]
-wrkspc-dev = { path = "wrkspc-dev" }
-wrkspc-macro = { path = "wrkspc-macro" }
-wrkspc-test = { path = "wrkspc-test" }
+wrkspc-dev.workspace = true
+wrkspc-macro.workspace = true
+wrkspc-test.workspace = true
 
-macrotest = { path = "../" }
+macrotest.workspace = true
 
-inventory = "0.3"
-proc-macro2 = "1.0"
-quote = "1"
-syn = "2.0"
+# inventory.workspace = true
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true

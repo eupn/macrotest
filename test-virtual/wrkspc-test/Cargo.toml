@@ -1,38 +1,24 @@
 [package]
 name = "wrkspc-test"
+edition = "2021"
 
 publish = false
 
-[lib]
-path = "src/lib.rs"
-
-# [[bin]]
-# name = "wrkspc-test"
-# path = "src/main.rs"
-
 [features]
 default = []
-test-feature = []
 
 [dependencies]
-wrkspc-dev.workspace = true
-wrkspc-macro.workspace = true
-
-macrotest.workspace = true
-inventory.workspace = true
+wrkspc-macro = { path = "../wrkspc-macro" }
 
 [dev-dependencies]
-wrkspc-dev.workspace = true
-wrkspc-macro.workspace = true
-macrotest.workspace = true
-inventory.workspace = true
 
-# [[test]]
-# name = "integration-tests"
-# path = "src/main.rs"
-# harness = false
-
-# [[test]]
-# name = "feature-test"
-# path = "src/tests/feature.rs"
-# harness = false
+# Staged files are managed by the redo build system scripts
+[[bin]]
+name = "attribute"
+path = "src/tests/expand/attribute.expanded.rs.staged"
+[[bin]]
+name = "derive"
+path = "src/tests/expand/derive.expanded.rs.staged"
+[[bin]]
+name = "macro"
+path = "src/tests/expand/macro.expanded.rs.staged"
