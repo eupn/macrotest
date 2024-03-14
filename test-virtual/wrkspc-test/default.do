@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-set -x
+# shellcheck shell=bash
+#set -x
+
+# Exit on error
+set -e
+
+exec >&2
 
 # Define the source and destination directories
 REPO_DIR=$(git rev-parse --show-toplevel)
@@ -19,15 +25,15 @@ rel_path=$(realpath --relative-to="${DEST_DIR}/src" $exp_file)
 src_file="${SRC_DIR}/${rel_path}"
 
 if [ -e "${src_file}" ]; then
-  cp --force "${src_file}" "${exp_file}.staged"
   # A source expanded file exists. Build.
+  cp --force "${src_file}" "${exp_file}.staged"
   cat "${src_file}" >"$3"
 else
     echo "$0: Fatal: don't know how to build '$1'" >&2
     exit 99
 fi
 
-cargo build --release --bin "${bin_name}"
+cargo build --release --bin "${bin_name}" &>target/wrkspc-test-build.log
 
 if [ $? -eq 0 ]; then
   rm --force "${exp_file}.staged"

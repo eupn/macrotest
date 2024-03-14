@@ -3,26 +3,29 @@
 # $1 is the target name, eg. pie.init
 # $2 is the same as $1.
 # $3 is the temporary output file to create.
-#    If this script succeeds, redo replaces $1 with $3.
-#    If this script fails, redo leaves $1 alone.
+#    If a .do script succeeds, redo replaces $1 with $3.
+#    If a .do script fails, redo leaves $1 alone.
 
-set -x
+# shellcheck shell=bash
+#set -x
+
+# Exit on error
+set -e
+
+exec >&2
 
 error_count=0
 error_messages=""
 
-# shellcheck shell=bash
-exec >&2
-
 REPO_DIR=$(git rev-parse --show-toplevel)
 DEST_DIR="src/tests"
 
-cargo test --manifest-path ./../wrkspc-macro/Cargo.toml
+cargo test --manifest-path ./../wrkspc-macro/Cargo.toml &>target/wrkspc-test-test.log
 
 # Find files with the extension '.do' within a maximum depth of 2 directories.
 # Remove the '.do' extension from the file names.
 # Exclude the current script file.
-# Finally, trigger the 'redo-ifchange' command for each file.
+# Finally, invoke the 'redo-ifchange' command for each file.
 SELF=$(basename "${0##*/}" .do)
 find . -maxdepth 2 -type f -name '*.do' -print0 | \
   xargs -0 echo | \
@@ -62,7 +65,10 @@ while IFS= read -r -d '' file; do
 # The ! -name "*.expanded.rs" is excluding any .rs files that end with .expanded.rs.
 # This is important because we only want to process original .rs files, not
 # ones that have been expanded.
-# Changing this line could result in processing the wrong set of files.
+#
+# Use process substitution (`<(command)`) instead of a pipe.
+# This will allow the `while` loop to run in the current shell and preserve
+# changes to the variables `${error_count}` and `${error_messages}` .
 done < <(find "${REPO_DIR}/test-virtual/wrkspc-macro/tests" -type f -name "*.rs" ! -name "*.expanded.rs" -print0)
 
 # Print all error messages
