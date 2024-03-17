@@ -143,7 +143,7 @@ where
                     failures += 1;
                 }
 
-                ExpansionOutcome::Update(_) => {
+                ExpansionOutcome::Update => {
                     let _ = writeln!(std::io::stderr(), "{} - refreshed", expanded_path.display());
                 }
 
@@ -313,7 +313,7 @@ fn make_config() -> Config {
 enum ExpansionOutcome {
     Same,
     Different(Vec<u8>, Vec<u8>),
-    Update(Vec<u8>),
+    Update,
     ExpandError(Vec<u8>),
     NoExpandedFileFound,
 }
@@ -361,7 +361,7 @@ impl ExpandedTest {
             // Write a .expanded.rs file contents
             std::fs::write(expanded, output)?;
 
-            return Ok(ExpansionOutcome::Update(output_bytes));
+            return Ok(ExpansionOutcome::Update);
         }
 
         let expected_expansion_bytes = std::fs::read(expanded)?;
@@ -377,7 +377,7 @@ impl ExpandedTest {
             // Write a .expanded.rs file contents
             std::fs::write(expanded, output)?;
 
-            return Ok(ExpansionOutcome::Update(output_bytes));
+            return Ok(ExpansionOutcome::Update);
         }
 
         Ok(if same {
