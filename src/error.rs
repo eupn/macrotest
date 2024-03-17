@@ -1,5 +1,3 @@
-use std::convert::From;
-
 #[derive(Debug)]
 pub(crate) enum Error {
     Cargo(std::io::Error),
