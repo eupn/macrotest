@@ -12,7 +12,8 @@ wrkspc-macro = { path = "../wrkspc-macro" }
 
 [dev-dependencies]
 
-# Staged files are managed by the redo build system scripts
+# Staged files are managed by the redo build system scripts.
+# After a successful build the .staged extension is removed.
 [[bin]]
 name = "attribute"
 path = "src/tests/expand/attribute.expanded.rs.staged"
