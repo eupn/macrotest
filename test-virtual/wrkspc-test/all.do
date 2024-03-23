@@ -2,9 +2,10 @@
 
 exec >&2
 
-REPO_DIR=$(git rev-parse --show-toplevel)
-DEST_DIR="src/tests"
 MACRO_DIR="test-virtual/wrkspc-macro"
+
+REPO_DIR=$(git rev-parse --show-toplevel)
+DEST_DIR="${REPO_DIR}/test-virtual/wrkspc-test/src/tests"
 
 mkdir -p target
 

@@ -7,7 +7,7 @@ MACRO_DIR="test-virtual/wrkspc-macro"
 # Define the source and destination directories
 REPO_DIR=$(git rev-parse --show-toplevel)
 SRC_DIR="${REPO_DIR}/${MACRO_DIR}"
-DEST_DIR="${REPO_DIR}/zno-test"
+DEST_DIR="${REPO_DIR}/test-virtual/wrkspc-test"
 
 exp_file="${DEST_DIR}/$1"
 src_file="${SRC_DIR}/$(realpath --relative-to="${DEST_DIR}/src" "$exp_file")"
