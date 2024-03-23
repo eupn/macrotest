@@ -1,7 +1,3 @@
 **/target
 **/*.rs.bk
 **/.redo
-Cargo.lock
-*.iml
-*.ipr
-*.iws
