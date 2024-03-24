@@ -1,11 +1,14 @@
 # `test-virtual`
 
-This is an example virtual-workspace that contains crates:
+A convention over configuration template for integration tests of proc-macros,
+in a workspace.
 
-- `wrkspc`
-- `wrkspc-dev`
-- `wrkspc-macro`
-- `wrkspc-test`
+This example workspace contains crates:
+
+- `wrkspc`: A library crate.
+- `wrkspc-dev`: A development crate.
+- `wrkspc-macro`: The Proc-macro crate.
+- `wrkspc-test`: Integration tests, and DJB's `redo` build system for `wrkspc-macro`.
 
 Where:
 
@@ -27,6 +30,26 @@ In this setup:
   - Extracting the filename from the path using `basename`, resulting in `bin`.
   - Removing the `.expanded.rs` extension using `cut`, resulting in `bin`.
 
+The next diagram shows the flow of data in the files between the folders `wkspc-macro` and `wkspc-test`:
+
+- `wkspc-macro` is the source directory containing the `.rs` to be tested files.
+- `all.do` processes each `.rs` file in `wkspc-macro`.
+- `default.expand.do` is called by `all.do` for each `.rs` file and generates a corresponding `.expanded.rs` file if the source file has changed.
+- The `.expanded.rs` files are placed in the `wkspc-test` directory.
+- If redoing the expanded file fails, it records the error message.
+- If the build succeeds, it removes `exp_file.staged`.
+
+[Build data flow](./images/figure-data.png)
+<!--
+flowchart LR
+    A[wkspc-macro] -->|Source .rs files| B[all.do]
+    B -->|Processes each file| C[default.expand.do]
+    C -->|Generates .expanded.rs files if source file has changed| D[wkspc-test]
+    D -->|If redo fails| E[Records error message]
+    E --> F[error_messages]
+    D -->|If build succeeds| G[Removes exp_file.staged]
+-->
+
 Here's a Mermaid diagram that shows how the build process in `all.do` flows to `default.expand.do` and then to `default.do`. In this first diagram:
 
 - `all.do` is the starting point of the build process.
@@ -43,8 +66,9 @@ Here's a Mermaid diagram that shows how the build process in `all.do` flows to `
   - It copies the source file to the destination, resulting in `exp_file.staged`.
   - It builds the file using `cargo build`. If the build succeeds, it removes `exp_file.staged`.
 
-```mermaid
-graph TD
+[Build logic flow](./images/figure-logic.png)
+<!--
+workflow TD
     A[all.do] -->|Iterates over all source files| B[default.expand.do]
     B --> C{Processes each file}
     C -->|1. Extracts filename from path| D[Uses basename]
@@ -67,26 +91,7 @@ graph TD
     T --> U[exp_file.staged]
     S -->|8. Builds with cargo| V[Uses cargo build]
     V -->|If build succeeds| W[Removes exp_file.staged]
-```
-
-The next diagram shows the flow of data in the files between the folders `wkspc-macro` and `wkspc-test`:
-
-- `wkspc-macro` is the source directory containing the `.rs` to be tested files.
-- `all.do` processes each `.rs` file in `wkspc-macro`.
-- `default.expand.do` is called by `all.do` for each `.rs` file and generates a corresponding `.expanded.rs` file if the source file has changed.
-- The `.expanded.rs` files are placed in the `wkspc-test` directory.
-- If redoing the expanded file fails, it records the error message.
-- If the build succeeds, it removes `exp_file.staged`.
-
-```mermaid
-graph LR
-    A[wkspc-macro] -->|Source .rs files| B[all.do]
-    B -->|Processes each file| C[default.expand.do]
-    C -->|Generates .expanded.rs files if source file has changed| D[wkspc-test]
-    D -->|If redo fails| E[Records error message]
-    E --> F[error_messages]
-    D -->|If build succeeds| G[Removes exp_file.staged]
-```
+-->
 
 ## Containers
 
