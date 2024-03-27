@@ -22,7 +22,8 @@ const EXPANDED_RS_SUFFIX: &str = "expanded.rs";
 pub(crate) struct Project {
     pub dir: PathBuf,
     source_dir: PathBuf,
-    pub target_dir: PathBuf,
+    /// Used for the inner runs of cargo()
+    pub inner_target_dir: PathBuf,
     pub name: String,
     pub features: Option<Vec<String>>,
     workspace: PathBuf,
@@ -205,10 +206,12 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
         fs::remove_dir_all(&dir)?;
     }
 
+    let inner_target_dir = path!(target_dir / "tests" / "macrotest");
+
     let mut project = Project {
         dir,
         source_dir,
-        target_dir,
+        inner_target_dir,
         name: format!("{}-tests", crate_name),
         features,
         workspace,
@@ -229,6 +232,8 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
     fs::write(path!(project.dir / ".cargo" / "config"), config_toml)?;
     fs::write(path!(project.dir / "Cargo.toml"), manifest_toml)?;
     fs::write(path!(project.dir / "main.rs"), b"fn main() {}\n")?;
+
+    fs::create_dir_all(&project.inner_target_dir)?;
 
     cargo::build_dependencies(&project)?;
 

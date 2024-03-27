@@ -24,7 +24,7 @@ fn cargo(project: &Project) -> Command {
     cmd.current_dir(&project.dir);
     cmd.env(
         "CARGO_TARGET_DIR",
-        path!(project.target_dir / "tests" / "target"),
+        &project.inner_target_dir,
     );
     rustflags::set_env(&mut cmd);
     cmd
