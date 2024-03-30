@@ -28,3 +28,10 @@ jobs:
       - run: cargo test --manifest-path test-project/Cargo.toml -- --nocapture
 
       - run: cargo test --manifest-path test-procmacro-project/Cargo.toml -- --nocapture
+
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@cargo-hack
+      - run: cargo hack check --rust-version
