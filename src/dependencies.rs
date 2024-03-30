@@ -74,6 +74,8 @@ pub struct WorkspaceManifest {
 
 #[derive(Deserialize, Default, Debug)]
 pub struct Manifest {
+    #[serde(default, rename = "cargo-features")]
+    pub cargo_features: Vec<String>,
     #[serde(default)]
     pub package: Package,
     #[serde(default)]
