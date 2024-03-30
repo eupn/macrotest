@@ -71,7 +71,7 @@
 //! First of all, the [`cargo expand`] tool must be present. You can install it via cargo:
 //!
 //! ```bash
-//! cargo install cargo-expand
+//! cargo install --locked cargo-expand
 //! ```
 //!
 //! ## Setting up a test project
