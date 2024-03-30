@@ -35,6 +35,7 @@ pub(crate) fn try_get_workspace_manifest(manifest_dir: &Path) -> Result<Workspac
     let manifest_str = fs::read_to_string(cargo_toml_path)?;
     let mut manifest: WorkspaceManifest = basic_toml::from_str(&manifest_str)?;
 
+    fix_dependencies(&mut manifest.workspace.dependencies, manifest_dir);
     fix_patches(&mut manifest.patch, manifest_dir);
     fix_replacements(&mut manifest.replace, manifest_dir);
 
@@ -67,9 +68,24 @@ fn fix_replacements(replacements: &mut Map<String, Patch>, dir: &Path) {
 #[derive(Deserialize, Default, Debug)]
 pub struct WorkspaceManifest {
     #[serde(default)]
+    pub workspace: Workspace,
+    #[serde(default)]
     pub patch: Map<String, RegistryPatch>,
     #[serde(default)]
     pub replace: Map<String, Patch>,
+}
+
+#[derive(Deserialize, Default, Debug)]
+pub struct Workspace {
+    #[serde(default)]
+    pub package: WorkspacePackage,
+    #[serde(default)]
+    pub dependencies: Map<String, Dependency>,
+}
+
+#[derive(Deserialize, Default, Debug)]
+pub struct WorkspacePackage {
+    pub edition: Option<String>,
 }
 
 #[derive(Deserialize, Default, Debug)]
@@ -107,6 +123,8 @@ pub struct Dependency {
     pub default_features: bool,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub features: Vec<String>,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub workspace: bool,
     #[serde(flatten)]
     pub rest: Map<String, Value>,
 }
@@ -134,6 +152,11 @@ fn get_true() -> bool {
 #[allow(clippy::trivially_copy_pass_by_ref)]
 fn is_true(boolean: &bool) -> bool {
     *boolean
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_false(boolean: &bool) -> bool {
+    !*boolean
 }
 
 impl Serialize for Dependency {
@@ -171,6 +194,7 @@ impl<'de> Deserialize<'de> for Dependency {
                     path: None,
                     default_features: true,
                     features: Vec::new(),
+                    workspace: false,
                     rest: Map::new(),
                 })
             }
