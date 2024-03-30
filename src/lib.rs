@@ -71,8 +71,15 @@
 //! First of all, the [`cargo expand`] tool must be present. You can install it via cargo:
 //!
 //! ```bash
-//! cargo install cargo-expand
+//! cargo install --locked cargo-expand
 //! ```
+//!
+//! (In CI, you'll want to pin to a particular version,
+//! since
+//! [cargo expand's output is not stable across versions](https://github.com/dtolnay/cargo-expand/issues/179).
+//! Look up the
+//! [current version](https://crates.io/crates/cargo-expand)
+//! and do something like `cargo install --locked --version 1.0.81 cargo-expand`.)
 //!
 //! ## Setting up a test project
 //!
