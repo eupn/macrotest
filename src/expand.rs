@@ -258,6 +258,7 @@ fn make_manifest(
         .collect();
 
     let mut manifest = Manifest {
+        cargo_features: source_manifest.cargo_features.clone(),
         package: Package {
             name: project.name.clone(),
             version: "0.0.0".to_owned(),

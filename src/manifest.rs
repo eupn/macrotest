@@ -6,6 +6,9 @@ use std::path::PathBuf;
 
 #[derive(Serialize, Debug)]
 pub struct Manifest {
+    #[serde(rename = "cargo-features")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub cargo_features: Vec<String>,
     pub package: Package,
     #[serde(skip_serializing_if = "Map::is_empty")]
     pub features: Map<String, Vec<String>>,
