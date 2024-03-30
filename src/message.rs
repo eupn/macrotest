@@ -59,15 +59,6 @@ pub(crate) fn message_expansion_error(msg: Vec<u8>) {
             eprintln!("\tcargo install cargo-expand");
             eprintln!();
         }
-
-        // No nightly installed, make a suggestion
-        if msg.starts_with("error: toolchain '") && msg.ends_with("is not installed") {
-            eprintln!("You have `cargo expand` installed but it requires *nightly* compiler to be installed as well.");
-            eprintln!("To install it via rustup, run:");
-            eprintln!();
-            eprintln!("\trustup toolchain install nightly");
-            eprintln!();
-        }
     } else {
         eprintln!("<unprintable>");
     }

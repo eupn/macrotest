@@ -19,7 +19,7 @@ Please refer to the [documentation](https://docs.rs/macrotest).
 
 ## Example
 
-Install nightly rust and [`cargo expand`].
+Install [`cargo expand`].
 
 Add to your crate's Cargo.toml:
 
