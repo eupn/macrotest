@@ -229,7 +229,7 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
     }
 
     fs::create_dir_all(path!(project.dir / ".cargo"))?;
-    fs::write(path!(project.dir / ".cargo" / "config"), config_toml)?;
+    fs::write(path!(project.dir / ".cargo" / "config.toml"), config_toml)?;
     fs::write(path!(project.dir / "Cargo.toml"), manifest_toml)?;
     fs::write(path!(project.dir / "main.rs"), b"fn main() {}\n")?;
 
