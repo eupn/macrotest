@@ -21,11 +21,6 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
 
-      # A nightly toolchain is required for cargo-expand to work, even if the
-      # toolchain with which tests are run is not nightly.
-      - run: rustup toolchain install nightly
-        if: matrix.rust != 'nightly'
-
       - uses: taiki-e/cache-cargo-install-action@v1
         with:
           tool: cargo-expand

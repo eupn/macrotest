@@ -74,8 +74,6 @@
 //! cargo install cargo-expand
 //! ```
 //!
-//! A **nightly** compiler is required for this tool to work, so it must be installed as well.
-//!
 //! ## Setting up a test project
 //!
 //! In your crate that provides procedural or declarative macros, under the `tests` directory,
