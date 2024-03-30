@@ -1,8 +1,9 @@
 use crate::error::Error;
 use crate::manifest::Edition;
 use serde::de::value::MapAccessDeserializer;
-use serde::de::{self, Visitor};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::de::{self, Deserialize, Deserializer, Visitor};
+use serde::ser::{Serialize, Serializer};
+use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap as Map;
 use std::fmt;

@@ -7,7 +7,7 @@ use crate::error::{Error, Result};
 use crate::expand::Project;
 use crate::manifest::Name;
 use crate::rustflags;
-use serde::Deserialize;
+use serde_derive::Deserialize;
 
 #[derive(Deserialize)]
 pub struct Metadata {
