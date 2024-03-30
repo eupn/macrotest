@@ -268,7 +268,12 @@ fn make_manifest(
         features,
         dependencies: std::collections::BTreeMap::new(),
         bins: Vec::new(),
-        workspace: Some(Workspace {}),
+        workspace: Some(Workspace {
+            package: crate::manifest::WorkspacePackage {
+                edition: workspace_manifest.workspace.package.edition,
+            },
+            dependencies: workspace_manifest.workspace.dependencies,
+        }),
         // Within a workspace, only the [patch] and [replace] sections in
         // the workspace root's Cargo.toml are applied by Cargo.
         patch: workspace_manifest.patch,
@@ -286,6 +291,7 @@ fn make_manifest(
             path: Some(project.source_dir.clone()),
             default_features: false,
             features: Vec::new(),
+            workspace: false,
             rest: std::collections::BTreeMap::new(),
         },
     );

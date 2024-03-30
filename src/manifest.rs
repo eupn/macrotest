@@ -1,5 +1,6 @@
 use crate::dependencies::{Dependency, Patch, RegistryPatch};
 use serde_derive::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::BTreeMap as Map;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -27,13 +28,13 @@ pub struct Manifest {
 pub struct Package {
     pub name: String,
     pub version: String,
-    pub edition: Edition,
     pub publish: bool,
+    pub edition: Edition,
 }
 
 // Do not use enum for edition for future-compatibility.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Edition(pub String);
+pub struct Edition(pub Value);
 
 #[derive(Serialize, Debug)]
 pub struct Bin {
@@ -55,7 +56,24 @@ pub struct Build {
 }
 
 #[derive(Serialize, Debug)]
-pub struct Workspace {}
+pub struct Workspace {
+    #[serde(skip_serializing_if = "WorkspacePackage::is_none")]
+    pub package: WorkspacePackage,
+    #[serde(skip_serializing_if = "Map::is_empty")]
+    pub dependencies: Map<String, Dependency>,
+}
+
+#[derive(Serialize, Debug)]
+pub struct WorkspacePackage {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edition: Option<String>,
+}
+
+impl WorkspacePackage {
+    fn is_none(&self) -> bool {
+        self.edition.is_none()
+    }
+}
 
 impl Default for Edition {
     fn default() -> Self {
