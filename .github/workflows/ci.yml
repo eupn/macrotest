@@ -17,12 +17,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{matrix.rust}}
-          profile: minimal
-          override: true
+          toolchain: ${{ matrix.rust }}
 
       # A nightly toolchain is required for cargo-expand to work, even if the
       # toolchain with which tests are run is not nightly.
