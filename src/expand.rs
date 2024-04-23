@@ -233,6 +233,12 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
     fs::write(path!(project.dir / "Cargo.toml"), manifest_toml)?;
     fs::write(path!(project.dir / "main.rs"), b"fn main() {}\n")?;
 
+    let source_lockfile = path!(project.workspace / "Cargo.lock");
+    match fs::copy(source_lockfile, path!(project.dir / "Cargo.lock")) {
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(0),
+        otherwise => otherwise,
+    }?;
+
     fs::create_dir_all(&project.inner_target_dir)?;
 
     cargo::build_dependencies(&project)?;
