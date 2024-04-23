@@ -1,0 +1,26 @@
+[package]
+name = "wrkspc"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+readme.workspace = true
+publish = false
+
+
+[dependencies]
+wrkspc-dev.workspace = true
+wrkspc-macro.workspace = true
+wrkspc-test.workspace = true
+
+macrotest.workspace = true
+
+# inventory.workspace = true
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true

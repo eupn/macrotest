@@ -1,0 +1,28 @@
+[package]
+name = "wrkspc-macro"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+readme.workspace = true
+publish= false
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true
+
+# wrkspc-test dependencies become dev-dependencies
+[dev-dependencies]
+wrkspc-dev.workspace = true
+# wrkspc-test.workspace = true
+
+macrotest.workspace = true
