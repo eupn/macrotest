@@ -256,10 +256,17 @@ fn make_manifest(
 
     let features = source_manifest
         .features
-        .keys()
-        .map(|feature| {
+        .iter()
+        .map(|(feature, source_deps)| {
             let enable = format!("{}/{}", crate_name, feature);
-            (feature.clone(), vec![enable])
+            let mut deps = vec![enable];
+            deps.extend(
+                source_deps
+                    .iter()
+                    .filter(|dep| dep.starts_with("dep:"))
+                    .cloned(),
+            );
+            (feature.clone(), deps)
         })
         .collect();
 
