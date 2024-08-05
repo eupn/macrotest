@@ -1,0 +1,25 @@
+[package]
+name = "wrkspc-test"
+edition = "2021"
+
+publish = false
+
+[features]
+default = []
+
+[dependencies]
+wrkspc-macro = { path = "../wrkspc-macro" }
+
+[dev-dependencies]
+
+# Staged files are managed by the redo build system scripts.
+# After a successful build the .staged extension is removed.
+[[bin]]
+name = "attribute"
+path = "src/tests/expand/attribute.expanded.rs.staged"
+[[bin]]
+name = "derive"
+path = "src/tests/expand/derive.expanded.rs.staged"
+[[bin]]
+name = "macro"
+path = "src/tests/expand/macro.expanded.rs.staged"
