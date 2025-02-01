@@ -14,7 +14,9 @@
 //! A minimal `macrotest` setup looks like this:
 //!
 //! ```rust
+//! # /*
 //! #[test]
+//! # */
 //! pub fn pass() {
 //!     macrotest::expand("tests/expand/*.rs");
 //!     // Alternatively,
@@ -90,7 +92,9 @@
 //! Then create a `tests.rs` file that will run the tests:
 //!
 //! ```rust
+//! # /*
 //! #[test]
+//! # */
 //! pub fn pass() {
 //!     macrotest::expand("tests/expand/*.rs");
 //!     // Or:
