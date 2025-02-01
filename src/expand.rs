@@ -184,7 +184,7 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
 
     let source_dir = env::var_os("CARGO_MANIFEST_DIR")
         .map(PathBuf::from)
-        .ok_or(Error::ManifestDirError)?;
+        .ok_or(Error::ManifestDir)?;
 
     let features = features::find();
 
