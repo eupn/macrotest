@@ -130,6 +130,8 @@
 //! [trybuild]: https://github.com/dtolnay/trybuild
 //! [`cargo expand`]: https://github.com/dtolnay/cargo-expand
 
+#![allow(clippy::lines_filter_map_ok)] // https://github.com/rust-lang/rust-clippy/issues/14127
+
 #[macro_use]
 mod path;
 
