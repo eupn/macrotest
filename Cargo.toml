@@ -11,6 +11,7 @@ description = "Test harness for macro expansion"
 
 [dependencies]
 diff = "0.1"
+fastrand = "2"
 glob = "0.3"
 prettyplease = "0.2"
 serde = "1.0.105"
