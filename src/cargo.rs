@@ -22,10 +22,7 @@ fn raw_cargo() -> Command {
 fn cargo(project: &Project) -> Command {
     let mut cmd = raw_cargo();
     cmd.current_dir(&project.dir);
-    cmd.env(
-        "CARGO_TARGET_DIR",
-        &project.inner_target_dir,
-    );
+    cmd.env("CARGO_TARGET_DIR", &project.inner_target_dir);
     rustflags::set_env(&mut cmd);
     cmd
 }
@@ -63,7 +60,7 @@ where
 
     let cargo_expand = cargo
         .output()
-        .map_err(|e| Error::CargoExpandExecutionError(e.to_string()))?;
+        .map_err(|e| Error::CargoExpandExecution(e.to_string()))?;
 
     if !cargo_expand.status.success() {
         return Ok((false, cargo_expand.stderr));
