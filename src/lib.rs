@@ -103,12 +103,12 @@
 //! 1. Expand macros in source files that match glob pattern
 //! 1. In case if [`expand`] function is used:
 //!     - On the first run, generate the `*.expanded.rs` files for each of the test cases under
-//!     the `expand` directory
+//!       the `expand` directory
 //!     - On subsequent runs, compare test cases' expansion result with the
-//!     content of the respective `*.expanded.rs` files
+//!       content of the respective `*.expanded.rs` files
 //! 1. In case if [`expand_without_refresh`] is used:
 //!     - On each run, it will compare test cases' expansion result with the content of the
-//!     respective `*.expanded.rs` files.
+//!       respective `*.expanded.rs` files.
 //!     - If one or more `*.expanded.rs` files is not found, the test will fail.
 //!
 //! ## Updating `.expanded.rs`
