@@ -18,7 +18,7 @@ pub(crate) fn get_manifest(manifest_dir: &Path) -> Manifest {
 fn try_get_manifest(manifest_dir: &Path) -> Result<Manifest, Error> {
     let cargo_toml_path = manifest_dir.join("Cargo.toml");
     let manifest_str = fs::read_to_string(cargo_toml_path)?;
-    let mut manifest: Manifest = basic_toml::from_str(&manifest_str)?;
+    let mut manifest: Manifest = toml_edit::de::from_str(&manifest_str)?;
 
     fix_dependencies(&mut manifest.dependencies, manifest_dir);
     fix_dependencies(&mut manifest.dev_dependencies, manifest_dir);
@@ -33,7 +33,7 @@ pub(crate) fn get_workspace_manifest(manifest_dir: &Path) -> WorkspaceManifest {
 pub(crate) fn try_get_workspace_manifest(manifest_dir: &Path) -> Result<WorkspaceManifest, Error> {
     let cargo_toml_path = manifest_dir.join("Cargo.toml");
     let manifest_str = fs::read_to_string(cargo_toml_path)?;
-    let mut manifest: WorkspaceManifest = basic_toml::from_str(&manifest_str)?;
+    let mut manifest: WorkspaceManifest = toml_edit::de::from_str(&manifest_str)?;
 
     fix_dependencies(&mut manifest.workspace.dependencies, manifest_dir);
     fix_patches(&mut manifest.patch, manifest_dir);
