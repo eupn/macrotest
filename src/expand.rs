@@ -2,8 +2,8 @@ use std::env;
 use std::ffi::OsStr;
 use std::fs;
 use std::io::Write;
+use std::iter;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::cargo;
 use crate::dependencies::{self, Dependency};
@@ -194,11 +194,10 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
         None => false,
     };
 
-    static COUNT: AtomicUsize = AtomicUsize::new(0);
-    // Use unique string for the crate dir to
+    // Use random string for the crate dir to
     // prevent conflicts when running parallel tests.
-    let unique_string: String = format!("macrotest{:03}", COUNT.fetch_add(1, Ordering::SeqCst));
-    let dir = path!(target_dir / "tests" / crate_name / unique_string);
+    let random_string: String = iter::repeat_with(fastrand::alphanumeric).take(42).collect();
+    let dir = path!(target_dir / "tests" / crate_name / random_string);
     if dir.exists() {
         // Remove remaining artifacts from previous runs if exist.
         // For example, if the user stops the test with Ctrl-C during a previous
