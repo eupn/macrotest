@@ -5,7 +5,8 @@ pub(crate) enum Error {
     CargoFail,
     CargoMetadata(serde_json::error::Error),
     Io(std::io::Error),
-    Toml(basic_toml::Error),
+    TomlSer(toml_edit::ser::Error),
+    TomlDe(toml_edit::de::Error),
     Glob(glob::GlobError),
     GlobPattern(glob::PatternError),
     ManifestDir,
@@ -25,7 +26,8 @@ impl std::fmt::Display for Error {
             CargoFail => write!(f, "cargo reported an error"),
             CargoMetadata(e) => write!(f, "{}", e),
             Io(e) => write!(f, "{}", e),
-            Toml(e) => write!(f, "{}", e),
+            TomlSer(e) => write!(f, "{}", e),
+            TomlDe(e) => write!(f, "{}", e),
             Glob(e) => write!(f, "{}", e),
             GlobPattern(e) => write!(f, "{}", e),
             ManifestDir => write!(f, "could not find CARGO_MANIFEST_DIR env var"),
@@ -45,9 +47,15 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl From<basic_toml::Error> for Error {
-    fn from(e: basic_toml::Error) -> Self {
-        Error::Toml(e)
+impl From<toml_edit::ser::Error> for Error {
+    fn from(e: toml_edit::ser::Error) -> Self {
+        Error::TomlSer(e)
+    }
+}
+
+impl From<toml_edit::de::Error> for Error {
+    fn from(e: toml_edit::de::Error) -> Self {
+        Error::TomlDe(e)
     }
 }
 
