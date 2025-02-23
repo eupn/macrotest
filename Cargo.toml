@@ -1,6 +1,6 @@
 [package]
 name = "macrotest"
-version = "1.0.13"
+version = "1.1.0"
 authors = ["eupn <eupn@protonmail.com>"]
 edition = "2018"
 rust-version = "1.65"
