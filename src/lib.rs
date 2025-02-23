@@ -1,5 +1,4 @@
 #![crate_type = "lib"]
-#![doc(html_root_url = "https://docs.rs/macrotest/1.0.13")]
 
 //! #### &emsp; Test harness for macro expansion.
 //!
