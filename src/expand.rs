@@ -218,10 +218,10 @@ fn prepare(tests: &[ExpandedTest]) -> Result<Project> {
     };
 
     let manifest = make_manifest(crate_name, &project, tests)?;
-    let manifest_toml = toml_edit::ser::to_string(&manifest)?;
+    let manifest_toml = toml::ser::to_string(&manifest)?;
 
     let config = make_config();
-    let config_toml = toml_edit::ser::to_string(&config)?;
+    let config_toml = toml::ser::to_string(&config)?;
 
     if let Some(enabled_features) = &mut project.features {
         enabled_features.retain(|feature| manifest.features.contains_key(feature));

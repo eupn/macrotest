@@ -4,7 +4,7 @@
 //!
 //! Similar to [trybuild], but allows you to write tests on how macros are expanded.
 //!
-//! *Minimal Supported Rust Version: 1.65*
+//! *Minimal Supported Rust Version: 1.66*
 //!
 //! <br>
 //!
