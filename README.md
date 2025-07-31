@@ -9,7 +9,7 @@
 
 Similar to [trybuild], but allows you to test how declarative or procedural macros are expanded.
 
-*Minimal Supported Rust Version: 1.65*
+*Minimal Supported Rust Version: 1.66*
 
 ----
 
