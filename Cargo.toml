@@ -17,5 +17,5 @@ prettyplease = "0.2"
 serde = "1.0.105"
 serde_derive = "1.0.105"
 serde_json = "1.0"
-syn = { version = "2", features = ["full"] }
+syn = { version = "2", default-features = false, features = ["parsing", "full"] }
 toml = "0.9"
