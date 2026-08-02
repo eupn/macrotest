@@ -14,9 +14,9 @@ description = "Test harness for macro expansion"
 diff = "0.1"
 fastrand = "2"
 glob = "0.3"
-prettyplease = "0.2"
+prettyplease = "0.3"
 serde = "1.0.105"
 serde_derive = "1.0.105"
 serde_json = "1.0"
-syn = { version = "2", default-features = false, features = ["parsing", "full"] }
+syn = { version = "3", default-features = false, features = ["parsing", "full"] }
 toml = "1.0"
