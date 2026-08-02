@@ -2,7 +2,7 @@
 name = "macrotest"
 version = "1.2.1"
 authors = ["eupn <eupn@protonmail.com>"]
-edition = "2021"
+edition = "2024"
 # NB: Sync with README.md and src/lib.rs.
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
