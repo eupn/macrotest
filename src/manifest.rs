@@ -14,6 +14,8 @@ pub struct Manifest {
     #[serde(skip_serializing_if = "Map::is_empty")]
     pub features: Map<String, Vec<String>>,
     pub dependencies: Map<String, Dependency>,
+    #[serde(rename = "dev-dependencies")]
+    pub dev_dependencies: Map<String, Dependency>,
     #[serde(rename = "bin")]
     pub bins: Vec<Bin>,
     #[serde(skip_serializing_if = "Option::is_none")]

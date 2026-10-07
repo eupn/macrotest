@@ -279,6 +279,7 @@ fn make_manifest(
         },
         features,
         dependencies: std::collections::BTreeMap::new(),
+        dev_dependencies: std::collections::BTreeMap::new(),
         bins: Vec::new(),
         workspace: Some(Workspace {
             package: crate::manifest::WorkspacePackage {
@@ -294,7 +295,7 @@ fn make_manifest(
 
     manifest.dependencies.extend(source_manifest.dependencies);
     manifest
-        .dependencies
+        .dev_dependencies
         .extend(source_manifest.dev_dependencies);
     manifest.dependencies.insert(
         crate_name,
