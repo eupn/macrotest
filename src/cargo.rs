@@ -41,7 +41,7 @@ pub(crate) fn expand<I, S>(
     project: &Project,
     name: &Name,
     args: &Option<I>,
-) -> Result<(bool, Vec<u8>)>
+) -> Result<std::process::Output>
 where
     I: IntoIterator<Item = S> + Clone,
     S: AsRef<OsStr>,
@@ -62,11 +62,7 @@ where
         .output()
         .map_err(|e| Error::CargoExpandExecution(e.to_string()))?;
 
-    if !cargo_expand.status.success() {
-        return Ok((false, cargo_expand.stderr));
-    }
-
-    Ok((true, cargo_expand.stdout))
+    Ok(cargo_expand)
 }
 
 /// Builds dependencies for macro expansion and pipes `cargo` output to `STDOUT`.

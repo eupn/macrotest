@@ -14,6 +14,13 @@ macro_rules! test_vec {
     };
 }
 
+#[macro_export]
+macro_rules! test_compile_error {
+    () => {
+        compile_error!("test_compile_error")
+    };
+}
+
 #[cfg(feature = "test-feature")]
 #[cfg_attr(feature = "test-feature", macro_export)]
 macro_rules! test_feature_vec {

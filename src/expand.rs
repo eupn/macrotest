@@ -58,6 +58,7 @@ pub fn expand(path: impl AsRef<Path>) {
     run_tests(
         path,
         ExpansionBehavior::RegenerateFiles,
+        ErrorBehavior::Fail,
         Option::<Vec<String>>::None,
     );
 }
@@ -70,7 +71,12 @@ where
     I: IntoIterator<Item = S> + Clone,
     S: AsRef<OsStr>,
 {
-    run_tests(path, ExpansionBehavior::RegenerateFiles, Some(args));
+    run_tests(
+        path,
+        ExpansionBehavior::RegenerateFiles,
+        ErrorBehavior::Fail,
+        Some(args),
+    );
 }
 
 /// Attempts to expand macros in files that match glob pattern.
@@ -90,6 +96,7 @@ pub fn expand_without_refresh(path: impl AsRef<Path>) {
     run_tests(
         path,
         ExpansionBehavior::ExpectFiles,
+        ErrorBehavior::Fail,
         Option::<Vec<String>>::None,
     );
 }
@@ -102,7 +109,88 @@ where
     I: IntoIterator<Item = S> + Clone,
     S: AsRef<OsStr>,
 {
-    run_tests(path, ExpansionBehavior::ExpectFiles, Some(args));
+    run_tests(
+        path,
+        ExpansionBehavior::ExpectFiles,
+        ErrorBehavior::Fail,
+        Some(args),
+    );
+}
+
+/// Attempts to expand macros in files that match glob pattern, and compares the expanded code
+/// even when the expansion reports an error, for example because a macro emits `compile_error!`.
+///
+/// # Refresh behavior
+///
+/// If no matching `.expanded.rs` files present, they will be created and result of expansion
+/// will be written into them.
+///
+/// # Panics
+///
+/// Will panic if matching `.expanded.rs` file is present, but has different expanded code in it.
+pub fn expand_allow_errors(path: impl AsRef<Path>) {
+    run_tests(
+        path,
+        ExpansionBehavior::RegenerateFiles,
+        ErrorBehavior::Allow,
+        Option::<Vec<String>>::None,
+    );
+}
+
+/// Same as [`expand_allow_errors`] but allows to pass additional arguments to `cargo-expand`.
+///
+/// [`expand_allow_errors`]: expand/fn.expand_allow_errors.html
+pub fn expand_allow_errors_args<I, S>(path: impl AsRef<Path>, args: I)
+where
+    I: IntoIterator<Item = S> + Clone,
+    S: AsRef<OsStr>,
+{
+    run_tests(
+        path,
+        ExpansionBehavior::RegenerateFiles,
+        ErrorBehavior::Allow,
+        Some(args),
+    );
+}
+
+/// Attempts to expand macros in files that match glob pattern, and compares the expanded code
+/// even when the expansion reports an error.
+/// More strict version of [`expand_allow_errors`] function.
+///
+/// # Refresh behavior
+///
+/// If no matching `.expanded.rs` files present, it considered a failed test.
+///
+/// # Panics
+///
+/// Will panic if no matching `.expanded.rs` file is present. Otherwise it will exhibit the same
+/// behavior as in [`expand_allow_errors`].
+///
+/// [`expand_allow_errors`]: expand/fn.expand_allow_errors.html
+pub fn expand_allow_errors_without_refresh(path: impl AsRef<Path>) {
+    run_tests(
+        path,
+        ExpansionBehavior::ExpectFiles,
+        ErrorBehavior::Allow,
+        Option::<Vec<String>>::None,
+    );
+}
+
+/// Same as [`expand_allow_errors_without_refresh`] but allows to pass additional arguments to
+/// `cargo-expand`.
+///
+/// [`expand_allow_errors_without_refresh`]: expand/fn.expand_allow_errors_without_refresh.html
+pub fn expand_allow_errors_without_refresh_args<I, S>(path: impl AsRef<Path>, args: I)
+where
+    I: IntoIterator<Item = S> + Clone,
+    S: AsRef<OsStr>,
+{
+    run_tests(
+        path,
+        ExpansionBehavior::ExpectFiles,
+        ErrorBehavior::Allow,
+        Some(args),
+    );
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -111,8 +199,18 @@ enum ExpansionBehavior {
     ExpectFiles,
 }
 
-fn run_tests<I, S>(path: impl AsRef<Path>, expansion_behavior: ExpansionBehavior, args: Option<I>)
-where
+#[derive(Debug, Copy, Clone)]
+enum ErrorBehavior {
+    Fail,
+    Allow,
+}
+
+fn run_tests<I, S>(
+    path: impl AsRef<Path>,
+    expansion_behavior: ExpansionBehavior,
+    error_behavior: ErrorBehavior,
+    args: Option<I>,
+) where
     I: IntoIterator<Item = S> + Clone,
     S: AsRef<OsStr>,
 {
@@ -133,7 +231,7 @@ where
         let path = test.test.display();
         let expanded_path = test.test.with_extension(EXPANDED_RS_SUFFIX);
 
-        match test.run(&project, expansion_behavior, &args) {
+        match test.run(&project, expansion_behavior, error_behavior, &args) {
             Ok(outcome) => match outcome {
                 ExpansionOutcome::Same => {
                     let _ = writeln!(std::io::stdout(), "{} - ok", path);
@@ -353,16 +451,19 @@ impl ExpandedTest {
         &self,
         project: &Project,
         expansion_behavior: ExpansionBehavior,
+        error_behavior: ErrorBehavior,
         args: &Option<I>,
     ) -> Result<ExpansionOutcome>
     where
         I: IntoIterator<Item = S> + Clone,
         S: AsRef<OsStr>,
     {
-        let (success, output_bytes) = cargo::expand(project, &self.name, args)?;
+        let cargo_expand = cargo::expand(project, &self.name, args)?;
 
-        if !success {
-            return Ok(ExpansionOutcome::ExpandError(output_bytes));
+        if !cargo_expand.status.success() {
+            if let ErrorBehavior::Fail = error_behavior {
+                return Ok(ExpansionOutcome::ExpandError(cargo_expand.stderr));
+            }
         }
 
         let file_stem = self
@@ -375,7 +476,7 @@ impl ExpandedTest {
         expanded.pop();
         let expanded = &expanded.join(format!("{}.{}", file_stem, EXPANDED_RS_SUFFIX));
 
-        let output = normalize_expansion(&output_bytes);
+        let output = normalize_expansion(&cargo_expand.stdout);
 
         if !expanded.exists() {
             if let ExpansionBehavior::ExpectFiles = expansion_behavior {

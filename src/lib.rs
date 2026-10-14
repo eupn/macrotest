@@ -67,6 +67,22 @@
 //! cargo expand --bin <test-name> --theme none --features my-feature
 //! ```
 //!
+//! ## Testing expansion errors
+//!
+//! From version 1.0.127, [`cargo expand`] exits with a non-zero code when the expansion has an
+//! error, for example from `compile_error!`. Then the test fails. With older versions, the test
+//! compares the expanded code.
+//!
+//! To keep such an expansion in an `.expanded.rs` file, use the following functions with
+//! `_allow_errors` in their name:
+//! - [`expand_allow_errors`]
+//! - [`expand_allow_errors_args`]
+//! - [`expand_allow_errors_without_refresh`]
+//! - [`expand_allow_errors_without_refresh_args`]
+//!
+//! These functions compare the expanded code with the `.expanded.rs` file, with or without an
+//! expansion error. A failed macro call shows as `/*ERROR*/` in the expanded code.
+//!
 //! # Workflow
 //!
 //! First of all, the [`cargo expand`] tool must be present. You can install it via cargo:
@@ -116,7 +132,8 @@
 //!
 //! ## Updating `.expanded.rs`
 //!
-//! This applicable only to tests that are using [`expand`] or [`expand_args`] function.
+//! This applicable only to tests that are using [`expand`], [`expand_args`],
+//! [`expand_allow_errors`] or [`expand_allow_errors_args`] function.
 //!
 //! Run tests with the environment variable `MACROTEST=overwrite` or remove the `*.expanded.rs`
 //! files and re-run the corresponding tests. Files will be created automatically; hand-writing
@@ -126,6 +143,10 @@
 //! [`expand_without_refresh_args`]: expand/fn.expand_without_refresh_args.html
 //! [`expand`]: expand/fn.expand.html
 //! [`expand_args`]: expand/fn.expand_args.html
+//! [`expand_allow_errors`]: expand/fn.expand_allow_errors.html
+//! [`expand_allow_errors_args`]: expand/fn.expand_allow_errors_args.html
+//! [`expand_allow_errors_without_refresh`]: expand/fn.expand_allow_errors_without_refresh.html
+//! [`expand_allow_errors_without_refresh_args`]: expand/fn.expand_allow_errors_without_refresh_args.html
 //! [trybuild]: https://github.com/dtolnay/trybuild
 //! [`cargo expand`]: https://github.com/dtolnay/cargo-expand
 
@@ -144,6 +165,10 @@ mod message;
 mod rustflags;
 
 pub use expand::expand;
+pub use expand::expand_allow_errors;
+pub use expand::expand_allow_errors_args;
+pub use expand::expand_allow_errors_without_refresh;
+pub use expand::expand_allow_errors_without_refresh_args;
 pub use expand::expand_args;
 pub use expand::expand_without_refresh;
 pub use expand::expand_without_refresh_args;
