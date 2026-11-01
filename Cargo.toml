@@ -1,6 +1,6 @@
 [package]
 name = "macrotest"
-version = "1.2.1"
+version = "1.3.0"
 authors = ["eupn <eupn@protonmail.com>"]
 edition = "2024"
 # NB: Sync with README.md and src/lib.rs.
